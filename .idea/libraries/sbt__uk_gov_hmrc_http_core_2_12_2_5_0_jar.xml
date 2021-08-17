@@ -1,13 +1,13 @@
 <component name="libraryTable">
   <library name="sbt: uk.gov.hmrc:http-core_2.12:2.5.0:jar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/Library/Caches/Coursier/v1/https/open.artefacts.tax.service.gov.uk/maven2/uk/gov/hmrc/http-core_2.12/2.5.0/http-core_2.12-2.5.0.jar!/" />
+      <root url="jar://$USER_HOME$/Library/Caches/Coursier/v1/https/artefacts.tax.service.gov.uk/artifactory/hmrc-releases/uk/gov/hmrc/http-core_2.12/2.5.0/http-core_2.12-2.5.0.jar!/" />
     </CLASSES>
     <JAVADOC>
-      <root url="jar://$USER_HOME$/Library/Caches/Coursier/v1/https/open.artefacts.tax.service.gov.uk/maven2/uk/gov/hmrc/http-core_2.12/2.5.0/http-core_2.12-2.5.0-javadoc.jar!/" />
+      <root url="jar://$USER_HOME$/Library/Caches/Coursier/v1/https/artefacts.tax.service.gov.uk/artifactory/hmrc-releases/uk/gov/hmrc/http-core_2.12/2.5.0/http-core_2.12-2.5.0-javadoc.jar!/" />
     </JAVADOC>
     <SOURCES>
-      <root url="jar://$USER_HOME$/Library/Caches/Coursier/v1/https/open.artefacts.tax.service.gov.uk/maven2/uk/gov/hmrc/http-core_2.12/2.5.0/http-core_2.12-2.5.0-sources.jar!/" />
+      <root url="jar://$USER_HOME$/Library/Caches/Coursier/v1/https/artefacts.tax.service.gov.uk/artifactory/hmrc-releases/uk/gov/hmrc/http-core_2.12/2.5.0/http-core_2.12-2.5.0-sources.jar!/" />
     </SOURCES>
   </library>
 </component>
