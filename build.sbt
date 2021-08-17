@@ -2,7 +2,7 @@ import scoverage.ScoverageKeys
 import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
-val appName = "agents-registration-frontend"
+val appName = "admin-capmovie-frontend"
 
 val silencerVersion = "1.7.3"
 
