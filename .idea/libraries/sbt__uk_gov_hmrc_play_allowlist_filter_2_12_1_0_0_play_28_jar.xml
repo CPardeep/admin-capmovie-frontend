@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="sbt: uk.gov.hmrc:play-allowlist-filter_2.12:1.0.0-play-28:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Library/Caches/Coursier/v1/https/open.artefacts.tax.service.gov.uk/maven2/uk/gov/hmrc/play-allowlist-filter_2.12/1.0.0-play-28/play-allowlist-filter_2.12-1.0.0-play-28.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/Library/Caches/Coursier/v1/https/open.artefacts.tax.service.gov.uk/maven2/uk/gov/hmrc/play-allowlist-filter_2.12/1.0.0-play-28/play-allowlist-filter_2.12-1.0.0-play-28-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/Library/Caches/Coursier/v1/https/open.artefacts.tax.service.gov.uk/maven2/uk/gov/hmrc/play-allowlist-filter_2.12/1.0.0-play-28/play-allowlist-filter_2.12-1.0.0-play-28-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
