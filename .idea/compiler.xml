@@ -2,12 +2,14 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
+      <module name="admin-capmovie-frontend" target="1.8" />
       <module name="admin-capmovies-frontend" target="1.8" />
       <module name="admin-frontend" target="1.8" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="admin-capmovie-frontend" options="-Xlint -encoding UTF-8 -encoding utf8 -g" />
       <module name="admin-capmovies-frontend" options="-Xlint -encoding UTF-8 -encoding utf8 -g" />
       <module name="admin-frontend" options="-Xlint -encoding UTF-8 -encoding utf8 -g" />
     </option>

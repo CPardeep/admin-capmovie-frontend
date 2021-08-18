@@ -22,5 +22,25 @@
         <plugin path="$USER_HOME$/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/com/github/ghik/silencer-plugin_2.12.13/1.7.3/silencer-plugin_2.12.13-1.7.3.jar" />
       </plugins>
     </profile>
+    <profile name="sbt 3" modules="admin-capmovie-frontend">
+      <option name="deprecationWarnings" value="true" />
+      <option name="uncheckedWarnings" value="true" />
+      <parameters>
+        <parameter value="-Xlint" />
+        <parameter value="-target:jvm-1.8" />
+        <parameter value="-Xmax-classfile-name" />
+        <parameter value="100" />
+        <parameter value="-encoding" />
+        <parameter value="UTF-8" />
+        <parameter value="-Ywarn-macros:after" />
+        <parameter value="-encoding" />
+        <parameter value="utf8" />
+        <parameter value="-P:silencer:pathFilters=routes" />
+        <parameter value="-Wconf:src=/Users/danielcarter/Documents/GitHub/admin-capmovie-frontend/target/.*:s" />
+      </parameters>
+      <plugins>
+        <plugin path="$USER_HOME$/Library/Caches/Coursier/v1/https/repo1.maven.org/maven2/com/github/ghik/silencer-plugin_2.12.13/1.7.3/silencer-plugin_2.12.13-1.7.3.jar" />
+      </plugins>
+    </profile>
   </component>
 </project>
