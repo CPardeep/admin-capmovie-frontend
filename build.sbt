@@ -25,7 +25,7 @@ lazy val microservice = Project(appName, file("."))
     libraryDependencies ++= Seq(
       compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
       "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full,
-      "org.jsoup"  %  "jsoup"  % "1.13.1",
+      "org.jsoup"  %  "jsoup"  % "1.14.2",
     )
 
     // ***************
@@ -38,10 +38,10 @@ lazy val microservice = Project(appName, file("."))
 
 
 libraryDependencies += ws
-libraryDependencies += "org.scalatestplus" %% "mockito-3-4" % "3.2.5.0" % "test"
+libraryDependencies += "org.scalatestplus" %% "mockito-3-4" % "3.2.9.0" % "test, it"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.9" % "test"
-libraryDependencies += "com.github.tomakehurst" % "wiremock-jre8" % "2.27.1"
-libraryDependencies += "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.12.3"
+libraryDependencies += "com.github.tomakehurst" % "wiremock-jre8" % "2.30.1"
+libraryDependencies += "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.12.4"
 libraryDependencies += "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28" % "0.50.0"
 libraryDependencies += "uk.gov.hmrc.mongo" %% "hmrc-mongo-test-play-28" % "0.50.0"
 
