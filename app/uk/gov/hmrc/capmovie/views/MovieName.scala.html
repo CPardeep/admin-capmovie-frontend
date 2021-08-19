@@ -1,0 +1,48 @@
+@import uk.gov.hmrc.capmovie.models.MovieRegName
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@this(layout: Layout, govukInput : GovukInput, govukErrorSummary : GovukErrorSummary)
+@(form: Form[MovieRegName])(implicit request: Request[_], messages: Messages)
+@layout(pageTitle = Some("Name Page")) {
+@if(form.errors.nonEmpty) {
+@defining(form.errors.map { error =>
+ErrorLink(href = Some(s"#${error.key}"), content = Text(messages(error.message, error.args:_*)))
+}) {errorLinks => @govukErrorSummary(ErrorSummary(
+errorList = errorLinks,
+title = Text(messages("There is a problem"))
+))
+}
+}
+@helper.form(uk.gov.hmrc.capmovie.controllers.routes.MovieNameController.submitMovieName()) {
+<div class="govuk-form-group">
+    @if(form.errors("name").nonEmpty) {
+    @govukInput(Input(
+    id = "name",
+    name = "name",
+    hint = Some(Hint(content = Text(""))),
+    errorMessage = Some(ErrorMessage(
+    content = Text("What is the name of the movie?"))),
+    label = Label(
+    isPageHeading = true,
+    classes = "govuk-label--l",
+    content = Text("name")
+    )
+    ))
+    } else {
+    @govukInput(Input(
+    id = "name",
+    name = "name",
+    hint = Some(Hint(content = Text(""))),
+    label = Label(
+    isPageHeading = true,
+    classes = "govuk-label--l",
+    content = Text("What is the name of the movie?")
+    )
+    ))
+    }
+    <br>
+    <button id="next-button" class="govuk-button" data-module="govuk-button">
+        Continue
+    </button>
+</div>
+}
+}
