@@ -22,14 +22,13 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.Json
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
-import play.api.test.Helpers.baseApplicationBuilder.injector
 import uk.gov.hmrc.capmovie.connectors.MovieConnector
 import uk.gov.hmrc.capmovie.models.MovieReg
 
 class MovieConnectorISpec extends AnyWordSpec with Matchers with GuiceOneServerPerSuite
-  with WireMockHelper with BeforeAndAfterEach{
+  with WireMockHelper with BeforeAndAfterEach {
 
-  lazy val connector: MovieConnector = injector.instanceOf[MovieConnector]
+  lazy val connector: MovieConnector = app.injector.instanceOf[MovieConnector]
 
   override val wireMockPort: Int = 9009
 
