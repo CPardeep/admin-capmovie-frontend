@@ -30,7 +30,7 @@ class MovieNameController @Inject()(repo: SessionRepo, mcc: MessagesControllerCo
     Ok(namePage(MovieRegName.form))
   }
   def submitMovieName(): Action[AnyContent] = Action { implicit request =>
-    MovieRegName.form.bindFromRequest().fold({formWithErrors => BadRequest}, {formData => Ok})
+    MovieRegName.form.bindFromRequest().fold({formWithErrors => BadRequest}, {formData => Ok(namePage(MovieRegName.form))})
 
   }
 
