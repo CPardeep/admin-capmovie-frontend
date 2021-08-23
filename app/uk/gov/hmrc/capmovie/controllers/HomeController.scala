@@ -16,25 +16,22 @@
 
 package uk.gov.hmrc.capmovie.controllers
 
-import play.api.i18n.Messages.implicitMessagesProviderToMessages
+
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.capmovie.models.MovieRegTitle
-import uk.gov.hmrc.capmovie.repo.SessionRepo
+import uk.gov.hmrc.capmovie.connectors.MovieConnector
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import uk.gov.hmrc.capmovie.views.html.MovieTitle
+import uk.gov.hmrc.capmovie.views.html.HomePage
 
 import javax.inject.Inject
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class MovieTitleController @Inject()(repo: SessionRepo,
-                                     mcc: MessagesControllerComponents,
-                                     titlePage: MovieTitle)
+class HomeController @Inject()(mcc: MessagesControllerComponents,
+                               home: HomePage,
+                               connector: MovieConnector)
   extends FrontendController(mcc) {
-  def getMovieTitle: Action[AnyContent] = Action { implicit request =>
-    Ok(titlePage(MovieRegTitle.form))
-  }
-  def submitMovieTitle(): Action[AnyContent] = Action { implicit request =>
-    MovieRegTitle.form.bindFromRequest().fold({ formWithErrors => BadRequest}, { formData => Ok(titlePage(MovieRegTitle.form))})
 
+  def homePage: Action[AnyContent] = Action.async { implicit request =>
+    connector.readAll().map(x => Ok(home(x)))
   }
 
 }

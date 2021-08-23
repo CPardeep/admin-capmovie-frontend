@@ -23,7 +23,7 @@ import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.Json
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.capmovie.connectors.MovieConnector
-import uk.gov.hmrc.capmovie.models.MovieReg
+import uk.gov.hmrc.capmovie.models.{Movie, MovieReg}
 
 class MovieConnectorISpec extends AnyWordSpec with Matchers with GuiceOneServerPerSuite
   with WireMockHelper with BeforeAndAfterEach {
@@ -49,6 +49,21 @@ class MovieConnectorISpec extends AnyWordSpec with Matchers with GuiceOneServerP
     poster = Some("testURL"),
     title = Some("testTitle"))
 
+  val movie: Movie = Movie(
+    id = "TESTMOV",
+    plot = "Test plot",
+    genres = List(
+      "testGenre1",
+      "testGenre2"),
+    rated = "testRating",
+    cast = List(
+      "testPerson",
+      "TestPerson"),
+    poster = "testURL",
+    title = "testTitle")
+
+  val movieList = List(movie, movie.copy(id = "TESTMOV2"))
+
   "create" should {
     "return true" when {
       "the data is inserted into db" in {
@@ -68,6 +83,25 @@ class MovieConnectorISpec extends AnyWordSpec with Matchers with GuiceOneServerP
         val result = connector.create(movieReg)
         await(result) shouldBe false
       }
+    }
+  }
+
+  "readAll" should {
+    "return movieList" in {
+      stubGet(s"/movie-list", 200, Json.toJson(movieList).toString())
+      val result = connector.readAll()
+      await(result) shouldBe movieList
+    }
+    "return emptyList" in {
+      stubGet(s"/movie-list", 400, Json.toJson("{}").toString())
+      val result = connector.readAll()
+      await(result) shouldBe List()
+    }
+
+    "fail to connect to database" in {
+      stubGet(s"/movie-list", 200, Json.toJson("{}").toString())
+      val result = connector.readAll()
+      await(result) shouldBe List()
     }
   }
 
