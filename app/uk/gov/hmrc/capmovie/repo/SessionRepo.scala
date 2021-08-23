@@ -38,10 +38,10 @@ class SessionRepo @Inject()(mongoComponent: MongoComponent) extends PlayMongoRep
     response => response.wasAcknowledged && !response.getInsertedId.isNull
   } recover { case _ => false }
 
-  def addName(id: String, name: String): Future[Boolean] = {
+  def addTitle(id: String, title: String): Future[Boolean] = {
     collection.updateOne(
       Filters.equal("adminId", id),
-        set("name", name)
+        set("title", title)
     ).toFuture().map(result => result.getModifiedCount == 1 && result.wasAcknowledged())
 
   }

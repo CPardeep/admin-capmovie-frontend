@@ -36,32 +36,36 @@ class MovieConnectorISpec extends AnyWordSpec with Matchers with GuiceOneServerP
 
   override def afterEach(): Unit = stopWireMock()
 
-  val movie: MovieReg = MovieReg(
-    adminId = "testId",
-    name = Some("testMov"),
-    year = Some(1111),
-    genre = Some("testGenre"),
-    ageRating = Some("testAgeRating"),
-    img = Some("testImg"),
-    description = Some("testDesc"))
+  val movieReg: MovieReg = MovieReg(
+    adminId = "TESTMOV",
+    plot = Some("Test plot"),
+    genres = Some(List(
+      "testGenre1",
+      "testGenre2")),
+    rated = Some("testRating"),
+    cast = Some(List(
+      "testPerson",
+      "TestPerson")),
+    poster = Some("testURL"),
+    title = Some("testTitle"))
 
   "create" should {
     "return true" when {
       "the data is inserted into db" in {
-        stubPost(s"/movie", 201, Json.toJson(movie).toString())
-        val result = connector.create(movie)
+        stubPost(s"/movie", 201, Json.toJson(movieReg).toString())
+        val result = connector.create(movieReg)
         await(result) shouldBe true
       }
     }
     "return false" when {
       "invalid data is inserted into db" in {
         stubPost(s"/movie", 400, Json.toJson("{}").toString())
-        val result = connector.create(movie)
+        val result = connector.create(movieReg)
         await(result) shouldBe false
       }
       "database fails to insert the data" in {
         stubPost(s"/movie", 500, Json.toJson("movie").toString())
-        val result = connector.create(movie)
+        val result = connector.create(movieReg)
         await(result) shouldBe false
       }
     }

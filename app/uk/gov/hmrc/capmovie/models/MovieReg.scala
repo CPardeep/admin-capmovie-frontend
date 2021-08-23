@@ -21,23 +21,23 @@ import play.api.data.Forms.{mapping, text}
 import play.api.libs.json.{Json, OFormat}
 
 case class MovieReg(adminId: String,
-                    name: Option[String] = None,
-                    year: Option[Int] = None,
-                    genre: Option[String] = None,
-                    ageRating: Option[String] = None,
-                    img: Option[String] = None,
-                    description: Option[String] = None)
+                    plot: Option[String] = None,
+                    genres: Option[List[String]] = None,
+                    rated: Option[String] = None,
+                    cast: Option[List[String]] = None,
+                    poster: Option[String] = None,
+                    title: Option[String] = None)
 
 object MovieReg {
   implicit val format: OFormat[MovieReg] = Json.format[MovieReg]
 }
 
-case class MovieRegName(name: String)
+case class MovieRegTitle(title: String)
 
-object MovieRegName {
-  val form: Form[MovieRegName] = Form(
-    mapping("name" -> text.verifying("cannot leave empty", _.nonEmpty)
-    )(MovieRegName.apply)(MovieRegName.unapply)
+object MovieRegTitle {
+  val form: Form[MovieRegTitle] = Form(
+    mapping("title" -> text.verifying("cannot leave empty", _.nonEmpty)
+    )(MovieRegTitle.apply)(MovieRegTitle.unapply)
   )
 }
 

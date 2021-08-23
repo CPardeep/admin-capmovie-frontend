@@ -23,23 +23,33 @@ import play.api.libs.json.{JsSuccess, JsValue, Json}
 class MovieRegSpec extends AnyWordSpec with Matchers {
 
   val movieReg: MovieReg = MovieReg(
-    adminId = "testId",
-    name = Some("testMov"),
-    year = Some(1111),
-    genre = Some("testGenre"),
-    ageRating = Some("testAgeRating"),
-    img = Some("testImg"),
-    description = Some("testDesc"))
+    adminId = "TESTMOV",
+    plot = Some("Test plot"),
+    genres = Some(List(
+      "testGenre1",
+      "testGenre2")),
+    rated = Some("testRating"),
+    cast = Some(List(
+      "testPerson",
+      "TestPerson")),
+    poster = Some("testURL"),
+    title = Some("testTitle"))
 
   val movieRegJson: JsValue = Json.parse(
     s"""{
-       |    "adminId" : "testId",
-       |    "name" : "testMov",
-       |    "year" : 1111,
-       |    "genre" : "testGenre",
-       |    "ageRating" : "testAgeRating",
-       |    "img" : "testImg",
-       |    "description" : "testDesc"
+       |    "adminId" : "TESTMOV",
+       |    "plot" : "Test plot",
+       |    "genres" : [
+       |      "testGenre1",
+       |      "testGenre2"
+       |    ],
+       |    "rated" : "testRating",
+       |    "cast" : [
+       |      "testPerson",
+       |      "TestPerson"
+       |    ],
+       |    "poster" : "testURL",
+       |    "title" : "testTitle"
        |}
        |""".stripMargin)
 
