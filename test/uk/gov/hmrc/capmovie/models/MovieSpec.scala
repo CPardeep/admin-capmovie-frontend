@@ -20,46 +20,45 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.{JsSuccess, JsValue, Json}
 
-class MovieRegSpec extends AnyWordSpec with Matchers {
+class MovieSpec extends AnyWordSpec with Matchers {
 
-  val movieReg: MovieReg = MovieReg(
-    adminId = "TESTMOV",
-    plot = Some("Test plot"),
-    genres = Some(List(
+  val movie: Movie = Movie(
+    id = "TESTMOV",
+    plot = "Test plot",
+    genres = List(
       "testGenre1",
-      "testGenre2")),
-    rated = Some("testRating"),
-    cast = Some(List(
+      "testGenre2"),
+    rated = "testRating",
+    cast = List(
       "testPerson",
-      "TestPerson")),
-    poster = Some("testURL"),
-    title = Some("testTitle"))
-
-  val movieRegJson: JsValue = Json.parse(
+      "TestPerson"),
+    poster = "testURL",
+    title = "testTitle")
+  val movieJson: JsValue = Json.parse(
     s"""{
-       |    "adminId" : "TESTMOV",
-       |    "plot" : "Test plot",
+       |    "id" : "${movie.id}",
+       |    "plot" : "${movie.plot}",
        |    "genres" : [
-       |      "testGenre1",
-       |      "testGenre2"
+       |       "${movie.genres.head}",
+       |       "${movie.genres(1)}"
        |    ],
-       |    "rated" : "testRating",
+       |    "rated" : "${movie.rated}",
        |    "cast" : [
-       |      "testPerson",
-       |      "TestPerson"
+       |       "${movie.cast.head}",
+       |       "${movie.cast(1)}"
        |    ],
-       |    "poster" : "testURL",
-       |    "title" : "testTitle"
+       |    "poster" : "${movie.poster}",
+       |    "title" : "${movie.title}"
        |}
        |""".stripMargin)
 
-
-  "OFormat" should {
+  "Oformat" should {
     "convert object to json" in {
-      Json.toJson(movieReg) shouldBe movieRegJson
+      Json.toJson(movie) shouldBe movieJson
     }
     "convert json to object" in {
-      Json.fromJson[MovieReg](movieRegJson) shouldBe JsSuccess(movieReg)
+      Json.fromJson[Movie](movieJson) shouldBe JsSuccess(movie)
     }
   }
+
 }

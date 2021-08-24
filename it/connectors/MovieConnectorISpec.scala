@@ -23,7 +23,7 @@ import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.Json
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.capmovie.connectors.MovieConnector
-import uk.gov.hmrc.capmovie.models.MovieReg
+import uk.gov.hmrc.capmovie.models.{Movie, MovieReg}
 
 class MovieConnectorISpec extends AnyWordSpec with Matchers with GuiceOneServerPerSuite
   with WireMockHelper with BeforeAndAfterEach {
@@ -36,34 +36,72 @@ class MovieConnectorISpec extends AnyWordSpec with Matchers with GuiceOneServerP
 
   override def afterEach(): Unit = stopWireMock()
 
-  val movie: MovieReg = MovieReg(
-    adminId = "testId",
-    name = Some("testMov"),
-    year = Some(1111),
-    genre = Some("testGenre"),
-    ageRating = Some("testAgeRating"),
-    img = Some("testImg"),
-    description = Some("testDesc"))
+  val movieReg: MovieReg = MovieReg(
+    adminId = "TESTMOV",
+    plot = Some("Test plot"),
+    genres = Some(List(
+      "testGenre1",
+      "testGenre2")),
+    rated = Some("testRating"),
+    cast = Some(List(
+      "testPerson",
+      "TestPerson")),
+    poster = Some("testURL"),
+    title = Some("testTitle"))
+
+  val movie: Movie = Movie(
+    id = "TESTMOV",
+    plot = "Test plot",
+    genres = List(
+      "testGenre1",
+      "testGenre2"),
+    rated = "testRating",
+    cast = List(
+      "testPerson",
+      "TestPerson"),
+    poster = "testURL",
+    title = "testTitle")
+
+  val movieList = List(movie, movie.copy(id = "TESTMOV2"))
 
   "create" should {
     "return true" when {
       "the data is inserted into db" in {
-        stubPost(s"/movie", 201, Json.toJson(movie).toString())
-        val result = connector.create(movie)
+        stubPost(s"/movie", 201, Json.toJson(movieReg).toString())
+        val result = connector.create(movieReg)
         await(result) shouldBe true
       }
     }
     "return false" when {
       "invalid data is inserted into db" in {
         stubPost(s"/movie", 400, Json.toJson("{}").toString())
-        val result = connector.create(movie)
+        val result = connector.create(movieReg)
         await(result) shouldBe false
       }
       "database fails to insert the data" in {
         stubPost(s"/movie", 500, Json.toJson("movie").toString())
-        val result = connector.create(movie)
+        val result = connector.create(movieReg)
         await(result) shouldBe false
       }
+    }
+  }
+
+  "readAll" should {
+    "return movieList" in {
+      stubGet(s"/movie-list", 200, Json.toJson(movieList).toString())
+      val result = connector.readAll()
+      await(result) shouldBe movieList
+    }
+    "return emptyList" in {
+      stubGet(s"/movie-list", 400, Json.toJson("{}").toString())
+      val result = connector.readAll()
+      await(result) shouldBe List()
+    }
+
+    "fail to connect to database" in {
+      stubGet(s"/movie-list", 200, Json.toJson("{}").toString())
+      val result = connector.readAll()
+      await(result) shouldBe List()
     }
   }
 

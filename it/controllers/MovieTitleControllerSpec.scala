@@ -39,33 +39,33 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status.{BAD_REQUEST, OK}
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Helpers}
-import uk.gov.hmrc.capmovie.controllers.MovieNameController
+import uk.gov.hmrc.capmovie.controllers.MovieTitleController
 import uk.gov.hmrc.capmovie.repo.SessionRepo
-import uk.gov.hmrc.capmovie.views.html.MovieName
+import uk.gov.hmrc.capmovie.views.html.MovieTitle
 
-class MovieNameControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
+class MovieTitleControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
 
   val repo: SessionRepo = mock[SessionRepo]
-  val namePage: MovieName = app.injector.instanceOf[MovieName]
-  val controller = new MovieNameController(repo, Helpers.stubMessagesControllerComponents(), namePage)
+  val namePage: MovieTitle = app.injector.instanceOf[MovieTitle]
+  val controller = new MovieTitleController(repo, Helpers.stubMessagesControllerComponents(), namePage)
 
   "getMovieName" should {
     "load the page when called" in {
-      val result = controller.getMovieName(FakeRequest("GET", "/"))
+      val result = controller.getMovieTitle(FakeRequest("GET", "/"))
       status(result) shouldBe OK
     }
   }
   "submitMovieName" should {
     "return a form value" when {
       "the form is submitted" in {
-        val result = controller.submitMovieName().apply(FakeRequest("POST", "/").withFormUrlEncodedBody("name" -> "testName"))
+        val result = controller.submitMovieTitle().apply(FakeRequest("POST", "/").withFormUrlEncodedBody("title" -> "testTitle"))
         status(result) shouldBe OK
       }
 
     }
     "return a bad request" when {
       "the form is submitted" in {
-        val result = controller.submitMovieName().apply(FakeRequest("POST", "/").withFormUrlEncodedBody("name" -> ""))
+        val result = controller.submitMovieTitle().apply(FakeRequest("POST", "/").withFormUrlEncodedBody("title" -> ""))
         status(result) shouldBe BAD_REQUEST
       }
 

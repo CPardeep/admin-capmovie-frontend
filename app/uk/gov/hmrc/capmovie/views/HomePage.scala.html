@@ -1,0 +1,14 @@
+@import uk.gov.hmrc.capmovie.models.Movie
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@this(layout: Layout, govukInput : GovukInput, govukErrorSummary : GovukErrorSummary)
+@(movieList: List[Movie] )(implicit request: Request[_], messages: Messages)
+@layout(pageTitle = Some("Home Page")) {
+<div id="movie-container">
+@for(movie <- movieList){
+<div class="movie-card">
+<p> @movie.title</p>
+<img src=@movie.poster/>
+</div>
+}
+</div>
+}

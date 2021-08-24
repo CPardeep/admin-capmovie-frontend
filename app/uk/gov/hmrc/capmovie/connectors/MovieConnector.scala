@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.capmovie.connectors
 
-import play.api.libs.json.Json
+import play.api.libs.json.{JsArray, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{AbstractController, ControllerComponents}
-import uk.gov.hmrc.capmovie.models.MovieReg
+import uk.gov.hmrc.capmovie.models.{Movie, MovieReg}
+
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -34,6 +35,23 @@ class MovieConnector @Inject()(ws: WSClient, cc: ControllerComponents)
         case _ => false
       }
     }
+  }
+
+  def readAll(): Future[List[Movie]] = {
+    ws.url("http://localhost:9009/movie-list").get().map{
+      x => x.status match {
+        case 200 => x.json.as[JsArray].value.map(response => Movie(
+          (response \ "id").as[String],
+          (response \ "plot").as[String],
+          (response \ "genres").as[List[String]],
+          (response \ "rated").as[String],
+          (response \ "cast").as[List[String]],
+          (response \ "poster").as[String],
+          (response \ "title").as[String],
+        )).toList
+        case _ => List()
+      }
+    }.recover {case _ => List()}
   }
 
 
