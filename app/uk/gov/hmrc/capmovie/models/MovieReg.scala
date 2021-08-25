@@ -50,3 +50,12 @@ object MovieRegPoster {
   )
 }
 
+case class MovieRegPlot(plot: String)
+
+object MovieRegPlot {
+  val form: Form[MovieRegPlot] = Form(
+    mapping("plot" -> text.verifying("cannot leave empty", _.nonEmpty)
+    )(MovieRegPlot.apply)(MovieRegPlot.unapply)
+  )
+}
+

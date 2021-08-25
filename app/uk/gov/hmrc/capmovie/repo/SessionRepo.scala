@@ -32,7 +32,7 @@ class SessionRepo @Inject()(mongoComponent: MongoComponent) extends PlayMongoRep
   mongoComponent = mongoComponent,
   domainFormat = MovieReg.format,
   indexes = Seq(IndexModel(ascending("adminId"), IndexOptions().unique(true)))
-){
+) {
 
   def create(movieReg: MovieReg): Future[Boolean] = collection.insertOne(movieReg).toFuture().map {
     response => response.wasAcknowledged && !response.getInsertedId.isNull
@@ -50,4 +50,12 @@ class SessionRepo @Inject()(mongoComponent: MongoComponent) extends PlayMongoRep
       set("poster", poster)
     ).toFuture().map(result => result.getModifiedCount == 1 && result.wasAcknowledged())
   }
+
+  def addPlot(id: String, plot: String): Future[Boolean] = {
+    collection.updateOne(
+      Filters.equal("adminId", id),
+      set("plot", plot)
+    ).toFuture().map(result => result.getModifiedCount == 1 && result.wasAcknowledged())
+  }
+
 }
