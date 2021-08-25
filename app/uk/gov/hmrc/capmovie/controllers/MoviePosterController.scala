@@ -16,27 +16,27 @@
 
 package uk.gov.hmrc.capmovie.controllers
 
-import play.api.i18n.Messages.implicitMessagesProviderToMessages
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.capmovie.models.MovieRegTitle
+import uk.gov.hmrc.capmovie.models.MovieRegPoster
 import uk.gov.hmrc.capmovie.repo.SessionRepo
+import uk.gov.hmrc.capmovie.views.html.MoviePoster
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import uk.gov.hmrc.capmovie.views.html.MovieTitle
 
 import javax.inject.Inject
 
-class MovieTitleController @Inject()(repo: SessionRepo,
-                                     mcc: MessagesControllerComponents,
-                                     titlePage: MovieTitle)
+class MoviePosterController @Inject()(repo: SessionRepo,
+                                      mcc: MessagesControllerComponents,
+                                      posterPage: MoviePoster)
   extends FrontendController(mcc) {
-  def getMovieTitle: Action[AnyContent] = Action { implicit request =>
-    Ok(titlePage(MovieRegTitle.form))
+  def getMoviePoster: Action[AnyContent] = Action { implicit request =>
+    Ok(posterPage(MovieRegPoster.form))
   }
-  def submitMovieTitle(): Action[AnyContent] = Action { implicit request =>
-    MovieRegTitle.form.bindFromRequest().fold({ formWithErrors =>
-      BadRequest(titlePage(formWithErrors))
-    }, { formData =>
-      Ok(titlePage(MovieRegTitle.form))
+
+  def submitMoviePoster(): Action[AnyContent] = Action { implicit request =>
+    MovieRegPoster.form.bindFromRequest().fold({ formWithErrors =>
+      BadRequest(posterPage(formWithErrors))
+    },{ formData =>
+      Ok(posterPage(MovieRegPoster.form))
     })
   }
 }

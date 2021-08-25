@@ -47,4 +47,14 @@ class SessionRepoISpec extends AnyWordSpec with Matchers with ScalaFutures with 
       await(repository.addTitle("falseId", "TheMovie")) shouldBe false
     }
   }
+  "addPoster" should {
+    "return true when valid details are submitted" in {
+      await(repository.create(MovieReg("testId")))
+      await(repository.addPoster("testId", "posterURL")) shouldBe true
+    }
+    "return false when wrong ID is submitted" in {
+      await(repository.create(MovieReg("testId")))
+      await(repository.addPoster("falseId", "posterURL")) shouldBe false
+    }
+  }
 }
