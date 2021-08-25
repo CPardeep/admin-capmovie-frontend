@@ -41,3 +41,12 @@ object MovieRegTitle {
   )
 }
 
+case class MovieRegPoster(poster: String)
+
+object MovieRegPoster {
+  val form: Form[MovieRegPoster] = Form(
+    mapping("poster" -> text.verifying("cannot leave empty", _.nonEmpty)
+    )(MovieRegPoster.apply)(MovieRegPoster.unapply)
+  )
+}
+
