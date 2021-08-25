@@ -1,0 +1,74 @@
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.capmovie.models.MovieRegRating
+@import helper._
+@this(layout: Layout, govukInput : GovukInput, govukErrorSummary : GovukErrorSummary)
+@(form: Form[MovieRegRating])(implicit request: Request[_], messages: Messages)
+@layout(pageTitle = Some("Age Rating")){
+
+<h1 class="govuk-heading-xl" id="Name Value">Please select the age rating of the film:</h1>
+@if(form.errors.nonEmpty){
+
+@defining(form.errors.map { error =>
+ErrorLink(href = Some(s"#${error.key}"), content = Text(messages(error.message, error.args:_*)))}) { errorLinks =>
+@govukErrorSummary(ErrorSummary(
+errorList = errorLinks,
+title = Text(messages("Please select the age rating of the film"))))
+}
+}
+
+@helper.form(action = uk.gov.hmrc.capmovie.controllers.routes.AgeRatingController.submitAgeRating()){
+<div class="govuk-form-group">
+    <div class="govuk-form-group">
+        <fieldset class="govuk-fieldset">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+            </legend>
+            <div class="govuk-radios">
+                <div class="govuk-radios__item">
+                    <input class="govuk-radios__input" id="rating-universal" name="ageRating" type="radio"
+                           value="Universal">
+                    <label class="govuk-label govuk-radios__label" for="rating-universal">
+                        U
+                    </label>
+                </div>
+                <div class="govuk-radios__item">
+                    <input class="govuk-radios__input" id="rating-parental-guidance" name="ageRating" type="radio"
+                           value="Parental Guidance">
+                    <label class="govuk-label govuk-radios__label" for="rating-parental-guidance">
+                        PG
+                    </label>
+                </div>
+                <div class="govuk-radios__item">
+                    <input class="govuk-radios__input" id="rating-12" name="ageRating" type="radio"
+                           value="12">
+                    <label class="govuk-label govuk-radios__label" for="rating-12">
+                        12
+                    </label>
+                </div>
+                <div class="govuk-radios__item">
+                    <input class="govuk-radios__input" id="rating-12A" name="ageRating" type="radio"
+                           value="12A">
+                    <label class="govuk-label govuk-radios__label" for="rating-12A">
+                        12A
+                    </label>
+                </div>
+                <div class="govuk-radios__item">
+                    <input class="govuk-radios__input" id="rating-15" name="ageRating" type="radio"
+                           value="15">
+                    <label class="govuk-label govuk-radios__label" for="rating-15">
+                        15
+                    </label>
+                </div>
+                <div class="govuk-radios__item">
+                    <input class="govuk-radios__input" id="rating-18" name="ageRating" type="radio"
+                           value="18">
+                    <label class="govuk-label govuk-radios__label" for="rating-18">
+                        18
+                    </label>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>
+<button class="govuk-button" id="submit" data-module="govuk-button" type="submit">Next</button>
+}
+}
