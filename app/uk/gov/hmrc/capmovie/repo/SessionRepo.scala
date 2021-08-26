@@ -61,7 +61,7 @@ class SessionRepo @Inject()(mongoComponent: MongoComponent) extends PlayMongoRep
   def addAgeRating(id: String, rating: String): Future[Boolean] = {
     collection.updateOne(
       Filters.equal("adminId", id),
-      set("title", rating)
+      set("rated", rating)
     ).toFuture().map(result => result.getModifiedCount == 1 && result.wasAcknowledged()
 
     )
