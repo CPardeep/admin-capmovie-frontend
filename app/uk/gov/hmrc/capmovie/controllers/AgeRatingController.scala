@@ -34,9 +34,12 @@ class AgeRatingController @Inject()(repo: SessionRepo,
   def getAgeRating: Action[AnyContent] = Action { implicit request =>
     Ok(ageRatingPage(MovieRegRating.form))
   }
-  def submitAgeRating: Action[AnyContent] = Action { implicit request =>
-    MovieRegRating.form.bindFromRequest().fold({ formWithErrors => BadRequest}, { formData => Ok(ageRatingPage(MovieRegRating.form))})
 
+  def submitAgeRating: Action[AnyContent] = Action { implicit request =>
+    MovieRegRating.form.bindFromRequest().fold({ formWithErrors => BadRequest(ageRatingPage(formWithErrors))
+    }, { formData =>
+      Ok(ageRatingPage(MovieRegRating.form))
+    })
   }
 }
 

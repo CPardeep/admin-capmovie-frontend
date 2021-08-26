@@ -64,10 +64,8 @@ object MovieRegPlot {
 case class MovieRegRating(rating: String)
 
 object MovieRegRating {
-  val form: Form[MovieRegRating] =
-    Form(
-      mapping
-      ("rated" -> text.verifying("cannot leave empty", _.nonEmpty)
+  val form: Form[MovieRegRating] = Form(
+      mapping("rated" -> text.verifying("cannot leave empty", _.nonEmpty)
       )(MovieRegRating.apply)(MovieRegRating.unapply)
     )
 

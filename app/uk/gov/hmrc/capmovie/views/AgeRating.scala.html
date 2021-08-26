@@ -1,7 +1,6 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.capmovie.models.MovieRegRating
-@import helper._
-@this(layout: Layout, govukInput : GovukInput, govukErrorSummary : GovukErrorSummary)
+@this(layout: Layout, govukRadios : GovukRadios, govukErrorSummary : GovukErrorSummary)
 @(form: Form[MovieRegRating])(implicit request: Request[_], messages: Messages)
 @layout(pageTitle = Some("Age Rating")){
 
@@ -18,57 +17,50 @@ title = Text(messages("Please select the age rating of the film"))))
 
 @helper.form(action = uk.gov.hmrc.capmovie.controllers.routes.AgeRatingController.submitAgeRating()){
 <div class="govuk-form-group">
-    <div class="govuk-form-group">
-        <fieldset class="govuk-fieldset">
-            <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-            </legend>
-            <div class="govuk-radios">
-                <div class="govuk-radios__item">
-                    <input class="govuk-radios__input" id="rating-universal" name="ageRating" type="radio"
-                           value="Universal">
-                    <label class="govuk-label govuk-radios__label" for="rating-universal">
-                        U
-                    </label>
-                </div>
-                <div class="govuk-radios__item">
-                    <input class="govuk-radios__input" id="rating-parental-guidance" name="ageRating" type="radio"
-                           value="Parental Guidance">
-                    <label class="govuk-label govuk-radios__label" for="rating-parental-guidance">
-                        PG
-                    </label>
-                </div>
-                <div class="govuk-radios__item">
-                    <input class="govuk-radios__input" id="rating-12" name="ageRating" type="radio"
-                           value="12">
-                    <label class="govuk-label govuk-radios__label" for="rating-12">
-                        12
-                    </label>
-                </div>
-                <div class="govuk-radios__item">
-                    <input class="govuk-radios__input" id="rating-12A" name="ageRating" type="radio"
-                           value="12A">
-                    <label class="govuk-label govuk-radios__label" for="rating-12A">
-                        12A
-                    </label>
-                </div>
-                <div class="govuk-radios__item">
-                    <input class="govuk-radios__input" id="rating-15" name="ageRating" type="radio"
-                           value="15">
-                    <label class="govuk-label govuk-radios__label" for="rating-15">
-                        15
-                    </label>
-                </div>
-                <div class="govuk-radios__item">
-                    <input class="govuk-radios__input" id="rating-18" name="ageRating" type="radio"
-                           value="18">
-                    <label class="govuk-label govuk-radios__label" for="rating-18">
-                        18
-                    </label>
-                </div>
-            </div>
-        </fieldset>
-    </div>
+    @govukRadios(Radios(
+    fieldset = Some(Fieldset(
+    legend = Some(Legend(
+    content = Text("What is the age rating of the film?"),
+    classes = "govuk-fieldset__legend--l",
+    isPageHeading = true
+    ))
+    )),
+    idPrefix = Some("rated"),
+    name = "rated",
+    items = Seq(
+    RadioItem(
+    content = Text("U"),
+    value = Some("U")
+    ),
+    RadioItem(
+    content = Text("PG"),
+    value = Some("PG")
+    ),
+    RadioItem(
+    content = Text("12A"),
+    value = Some("12A")
+    ),
+    RadioItem(
+    content = Text("12"),
+    value = Some("12")
+    ),
+    RadioItem(
+    content = Text("15"),
+    value = Some("15")
+    ),
+    RadioItem(
+    content = Text("18"),
+    value = Some("18")
+    )
+    )
+    ))
+    <br>
+    <button id="next-button" class="govuk-button" data-module="govuk-button">
+        Continue
+    </button>
 </div>
-<button class="govuk-button" id="submit" data-module="govuk-button" type="submit">Next</button>
 }
 }
+
+
+
