@@ -83,4 +83,35 @@ class SessionRepoISpec extends AnyWordSpec with Matchers with ScalaFutures with 
     }
 
   }
+
+  "addGenres" should {
+    "return true when valid details are submitted" in {
+      await(repository.create(MovieReg("testId")))
+      await(repository.addGenres("testId", "genre1")) shouldBe true
+    }
+    "return true when two valid details are submitted" in {
+      await(repository.create(MovieReg("testId")))
+      await(repository.addGenres("testId", "genre1"))
+      await(repository.addGenres("testId", "genre2")) shouldBe true
+      await(repository.collection.find().first().toFutureOption()).map(_.genres.size) shouldBe Some(2)
+    }
+    "return false when wrong ID is submitted" in {
+      await(repository.create(MovieReg("testId")))
+      await(repository.addGenres("falseId", "genre1")) shouldBe false
+    }
+  }
+  "readOne" should {
+    "return 1 when valid adminId is submitted" in {
+      await(repository.create(MovieReg("testId")))
+      await(repository.readOne("testId")).size shouldBe 1
+    }
+    "return 0 when adminId does not exist" in {
+      await(repository.create(MovieReg("testId")))
+      await(repository.readOne("falseId")).size shouldBe 0
+    }
+
+
+  }
+
+
 }

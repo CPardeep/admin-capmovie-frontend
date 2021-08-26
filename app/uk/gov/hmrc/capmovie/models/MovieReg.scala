@@ -22,7 +22,7 @@ import play.api.libs.json.{Json, OFormat}
 
 case class MovieReg(adminId: String,
                     plot: Option[String] = None,
-                    genres: Option[List[String]] = None,
+                    genres: List[String] = List(),
                     rated: Option[String] = None,
                     cast: Option[List[String]] = None,
                     poster: Option[String] = None,
@@ -40,6 +40,7 @@ object MovieRegTitle {
     )(MovieRegTitle.apply)(MovieRegTitle.unapply)
   )
 }
+
 
 
 case class MovieRegPoster(poster: String)
@@ -70,4 +71,15 @@ object MovieRegRating {
   )
 
 }
+
+
+case class MovieRegGenres(genres: String)
+
+object MovieRegGenres {
+  val form: Form[MovieRegGenres] = Form(
+    mapping("genres" -> text.verifying("Enter a genre", _.nonEmpty)
+    )(MovieRegGenres.apply)(MovieRegGenres.unapply)
+  )
+}
+
 

@@ -1,0 +1,23 @@
+@import uk.gov.hmrc.capmovie.models.MovieReg
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@this(layout: Layout, govukInput : GovukInput, govukErrorSummary : GovukErrorSummary)
+@(genresList: List[String] )(implicit request: Request[_], messages: Messages)
+@layout(pageTitle = Some("Genres Confirmation Page")) {
+
+<div id="genre-container">
+    <p class="govuk-body">List of genres: </p>
+    @for(genre <- genresList) {
+    <ul class="govuk-list govuk-list--bullet">
+        <li>genre</li>
+    </ul>
+    }
+</div>
+
+<br>
+<p>Do you want to add another genre?</p>
+<a id="add-another" href="http://localhost:9000/capmovie/movie-genres/" class="govuk-link">Add another genre</a>
+<button id="no-button" class="govuk-button" data-module="govuk-button">
+    No
+</button>
+
+}
