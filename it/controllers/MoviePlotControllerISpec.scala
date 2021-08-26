@@ -27,7 +27,7 @@ import uk.gov.hmrc.capmovie.controllers.MoviePlotController
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.MoviePlot
 
-class MoviePlotControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
+class MoviePlotControllerISpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
 
   val repo: SessionRepo = mock[SessionRepo]
   val plotPage: MoviePlot = app.injector.instanceOf[MoviePlot]

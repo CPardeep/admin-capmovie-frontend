@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.capmovie.models
 
-import play.api.data.Form
+import play.api.data.{Form, Forms}
 import play.api.data.Forms.{mapping, text}
 import play.api.libs.json.{Json, OFormat}
 
@@ -41,6 +41,7 @@ object MovieRegTitle {
   )
 }
 
+
 case class MovieRegPoster(poster: String)
 
 object MovieRegPoster {
@@ -50,6 +51,7 @@ object MovieRegPoster {
   )
 }
 
+
 case class MovieRegPlot(plot: String)
 
 object MovieRegPlot {
@@ -57,5 +59,15 @@ object MovieRegPlot {
     mapping("plot" -> text.verifying("cannot leave empty", _.nonEmpty)
     )(MovieRegPlot.apply)(MovieRegPlot.unapply)
   )
+
+}
+case class MovieRegRating(rating: String)
+
+object MovieRegRating {
+  val form: Form[MovieRegRating] = Form(
+      mapping("rated" -> text.verifying("cannot leave empty", _.nonEmpty)
+      )(MovieRegRating.apply)(MovieRegRating.unapply)
+    )
+
 }
 
