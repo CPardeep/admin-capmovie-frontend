@@ -61,7 +61,6 @@ class MovieTitleControllerSpec extends AnyWordSpec with Matchers with GuiceOneAp
         val result = controller.submitMovieTitle().apply(FakeRequest("POST", "/").withFormUrlEncodedBody("title" -> "testTitle"))
         status(result) shouldBe OK
       }
-
     }
     "return a bad request" when {
       "the form is submitted with errors" in {

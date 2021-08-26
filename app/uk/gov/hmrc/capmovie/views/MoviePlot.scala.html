@@ -1,0 +1,35 @@
+@import uk.gov.hmrc.capmovie.models.MovieRegPlot
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@this(layout: Layout, govukTextarea : GovukTextarea, govukErrorSummary : GovukErrorSummary)
+@(form: Form[MovieRegPlot])(implicit request: Request[_], messages: Messages)
+@layout(pageTitle = Some("Add a Plot")) {
+@if(form.errors.nonEmpty) {
+@defining(form.errors.map { error =>
+ErrorLink(href = Some(s"#${error.key}"), content = Text(messages(error.message, error.args:_*)))
+}) {errorLinks => @govukErrorSummary(ErrorSummary(
+errorList = errorLinks,
+title = Text(messages("There is a problem"))
+))
+}
+}
+@helper.form(uk.gov.hmrc.capmovie.controllers.routes.MoviePlotController.submitMoviePlot()) {
+<div class="govuk-form-group">
+    @govukTextarea(Textarea(
+    name = "plot",
+    id = "plot",
+    hint = Some(Hint(content = Text("Please provide what the movie plot is"))),
+    errorMessage = if(form.errors("title").nonEmpty) {Some(ErrorMessage(
+    content = Text("What is the plot of the movie?")))} else {None},
+    label = Label(
+    isPageHeading = true,
+    classes = "govuk-label--l",
+    content = Text("What is the plot of the movie?")
+    )
+    ))
+    <br>
+    <button id="next-button" class="govuk-button" data-module="govuk-button">
+        Continue
+    </button>
+</div>
+}
+}

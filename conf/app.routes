@@ -7,9 +7,15 @@ GET        /assets/*file                    controllers.Assets.versioned(path = 
 
 
 GET        /home                            uk.gov.hmrc.capmovie.controllers.HomeController.homePage
+
 GET        /movie-title                     uk.gov.hmrc.capmovie.controllers.MovieTitleController.getMovieTitle()
-GET        /movie-poster                    uk.gov.hmrc.capmovie.controllers.MoviePosterController.getMoviePoster()
 +nocsrf
 POST       /movie-title                     uk.gov.hmrc.capmovie.controllers.MovieTitleController.submitMovieTitle()
+
+GET        /movie-poster                    uk.gov.hmrc.capmovie.controllers.MoviePosterController.getMoviePoster()
 +nocsrf
 POST       /movie-poster                    uk.gov.hmrc.capmovie.controllers.MoviePosterController.submitMoviePoster()
+
+GET        /movie-plot                      uk.gov.hmrc.capmovie.controllers.MoviePlotController.getMoviePlot()
++nocsrf
+POST       /movie-plot                      uk.gov.hmrc.capmovie.controllers.MoviePlotController.submitMoviePlot()
