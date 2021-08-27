@@ -32,16 +32,21 @@ package controllers
  * limitations under the License.
  */
 
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.http.Status.{BAD_REQUEST, OK}
+import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, SEE_OTHER, UNAUTHORIZED}
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.capmovie.controllers.MovieTitleController
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.MovieTitle
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class MovieTitleControllerISpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
 
@@ -49,24 +54,43 @@ class MovieTitleControllerISpec extends AnyWordSpec with Matchers with GuiceOneA
   val namePage: MovieTitle = app.injector.instanceOf[MovieTitle]
   val controller = new MovieTitleController(repo, Helpers.stubMessagesControllerComponents(), namePage)
 
-  "getMovieName" should {
+  "getMovieTitle" should {
     "load the page when called" in {
+      when(repo.create(any())).thenReturn(Future(true))
       val result = controller.getMovieTitle(FakeRequest("GET", "/"))
       status(result) shouldBe OK
     }
   }
-  "submitMovieName" should {
+  "submitMovieTitle" should {
     "return a form value" when {
       "the form is submitted" in {
-        val result = controller.submitMovieTitle().apply(FakeRequest("POST", "/").withFormUrlEncodedBody("title" -> "testTitle"))
-        status(result) shouldBe OK
+        //when(repo.create(any())).thenReturn(Future(true))
+        when(repo.addTitle(any(), any())).thenReturn(Future(true))
+        val result = controller.submitMovieTitle().apply(FakeRequest("POST", "/")
+          .withSession("adminId" -> "TESTID").withFormUrlEncodedBody("title" -> "testTitle"))
+        status(result) shouldBe SEE_OTHER
       }
     }
     "return a bad request" when {
       "the form is submitted with errors" in {
-        val result = controller.submitMovieTitle().apply(FakeRequest("POST", "/").withFormUrlEncodedBody("title" -> ""))
+        val result = controller.submitMovieTitle().apply(FakeRequest("POST", "/")
+          .withFormUrlEncodedBody("title" -> ""))
         status(result) shouldBe BAD_REQUEST
       }
+    }
+
+    "return UnAuthorised" in {
+      when(repo.addTitle(any(), any())).thenReturn(Future(false))
+      val result = controller.submitMovieTitle().apply(FakeRequest("POST", "/")
+        .withSession("adminId" -> "TESTID").withFormUrlEncodedBody("title" -> "testTitle"))
+      status(result) shouldBe UNAUTHORIZED
+    }
+
+    "returns InternalServerError" in {
+      when(repo.addTitle(any(), any())).thenReturn(Future.failed(new RuntimeException))
+      val result = controller.submitMovieTitle().apply(FakeRequest("POST", "/")
+        .withSession("adminId" -> "TESTID").withFormUrlEncodedBody("title" -> "testTitle"))
+      status(result) shouldBe INTERNAL_SERVER_ERROR
     }
   }
 }

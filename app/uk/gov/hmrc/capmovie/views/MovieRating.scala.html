@@ -15,7 +15,7 @@ title = Text(messages("Please select the age rating of the film"))))
 }
 }
 
-@helper.form(action = uk.gov.hmrc.capmovie.controllers.routes.AgeRatingController.submitAgeRating()){
+@helper.form(action = uk.gov.hmrc.capmovie.controllers.routes.MovieRatingController.submitAgeRating()){
 <div class="govuk-form-group">
     @govukRadios(Radios(
     fieldset = Some(Fieldset(

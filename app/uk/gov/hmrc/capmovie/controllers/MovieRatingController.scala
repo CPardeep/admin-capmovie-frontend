@@ -17,28 +17,35 @@
 package uk.gov.hmrc.capmovie.controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.capmovie.models.{MovieRegRating, MovieRegTitle}
+import uk.gov.hmrc.capmovie.models.MovieRegRating
 import uk.gov.hmrc.capmovie.repo.SessionRepo
-import uk.gov.hmrc.capmovie.views.html.AgeRating
+import uk.gov.hmrc.capmovie.views.html.MovieRating
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
-
 import javax.inject.Inject
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 
-class AgeRatingController @Inject()(repo: SessionRepo,
-                                    mcc: MessagesControllerComponents,
-                                    ageRatingPage: AgeRating)
+class MovieRatingController @Inject()(repo: SessionRepo,
+                                      mcc: MessagesControllerComponents,
+                                      ageRatingPage: MovieRating)
 
   extends FrontendController(mcc) {
   def getAgeRating: Action[AnyContent] = Action { implicit request =>
-    Ok(ageRatingPage(MovieRegRating.form))
+    Ok(ageRatingPage(MovieRegRating.form.fill(MovieRegRating(""))))
   }
 
-  def submitAgeRating: Action[AnyContent] = Action { implicit request =>
-    MovieRegRating.form.bindFromRequest().fold({ formWithErrors => BadRequest(ageRatingPage(formWithErrors))
+  def submitAgeRating: Action[AnyContent] = Action.async { implicit request =>
+    MovieRegRating.form.bindFromRequest().fold({ formWithErrors =>
+      Future(BadRequest(ageRatingPage(formWithErrors)))
     }, { formData =>
-      Ok(ageRatingPage(MovieRegRating.form))
+      repo.addAgeRating(request.session.get("adminId").get, formData.rating).map {
+        case true => Redirect(routes.MovieRatingController.getAgeRating())
+        case false => Unauthorized("error")
+      }.recover {
+        case _ => InternalServerError
+      }
     })
   }
 }

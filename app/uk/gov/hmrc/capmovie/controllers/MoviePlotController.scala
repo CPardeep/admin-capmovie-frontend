@@ -23,6 +23,8 @@ import uk.gov.hmrc.capmovie.views.html.MoviePlot
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import javax.inject.Inject
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class MoviePlotController @Inject()(repo: SessionRepo,
                                     mcc: MessagesControllerComponents,
@@ -30,13 +32,22 @@ class MoviePlotController @Inject()(repo: SessionRepo,
   extends FrontendController(mcc) {
 
   def getMoviePlot: Action[AnyContent] = Action { implicit request =>
-    Ok(plotPage(MovieRegPlot.form))
+    // repo.create(MovieReg(adminId = request.session.get("adminId").getOrElse("")))
+    Ok(plotPage(MovieRegPlot.form.fill(MovieRegPlot(""))))
   }
 
-  def submitMoviePlot: Action[AnyContent] = Action { implicit request =>
-    MovieRegPlot.form.bindFromRequest().fold({formWithErrors => BadRequest(plotPage(formWithErrors)) }, {
-      formData => Ok(plotPage(MovieRegPlot.form))
+  def submitMoviePlot: Action[AnyContent] = Action.async { implicit request =>
+    MovieRegPlot.form.bindFromRequest().fold({ formWithErrors =>
+      Future(BadRequest(plotPage(formWithErrors)))
+    }, { formData =>
+      repo.addPlot(request.session.get("adminId").getOrElse(""), formData.plot).map {
+        case true => Redirect(routes.MoviePosterController.getMoviePoster())
+        case false => Unauthorized("error")
+      }.recover {
+        case _ => InternalServerError
+      }
     })
   }
+
 
 }

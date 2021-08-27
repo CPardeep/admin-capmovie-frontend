@@ -20,10 +20,11 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+import play.api.http.Status.{BAD_REQUEST, OK, UNAUTHORIZED}
 import play.api.libs.json.Json
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.capmovie.connectors.MovieConnector
-import uk.gov.hmrc.capmovie.models.{Movie, MovieReg}
+import uk.gov.hmrc.capmovie.models.{Admin, Movie, MovieReg}
 
 class MovieConnectorISpec extends AnyWordSpec with Matchers with GuiceOneServerPerSuite
   with WireMockHelper with BeforeAndAfterEach {
@@ -64,6 +65,11 @@ class MovieConnectorISpec extends AnyWordSpec with Matchers with GuiceOneServerP
 
   val movieList = List(movie, movie.copy(id = "TESTMOV2"))
 
+  val adminUser: Admin = Admin(
+    id = "TESTID",
+    password = "TESTPASS"
+  )
+
   "create" should {
     "return true" when {
       "the data is inserted into db" in {
@@ -103,6 +109,26 @@ class MovieConnectorISpec extends AnyWordSpec with Matchers with GuiceOneServerP
       val result = connector.readAll()
       await(result) shouldBe List()
     }
+  }
+
+  "login" should {
+    "return Ok" in {
+      stubPost(s"/admin-login", 200, Json.toJson(adminUser).toString())
+      val result = connector.login(adminUser)
+      await(result) shouldBe OK
+    }
+
+    "return Unauthorised" in {
+      stubPost(s"/admin-login", 401, Json.toJson("{}").toString())
+      val result = connector.login(adminUser)
+      await(result) shouldBe UNAUTHORIZED
+    }
+  }
+  "return Badrequest" in {
+    stubPost(s"/admin-login", 400, Json.toJson("{}").toString())
+    val result = connector.login(adminUser)
+    await(result) shouldBe BAD_REQUEST
+
   }
 
 }

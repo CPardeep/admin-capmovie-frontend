@@ -23,20 +23,29 @@ import uk.gov.hmrc.capmovie.views.html.MoviePoster
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import javax.inject.Inject
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class MoviePosterController @Inject()(repo: SessionRepo,
                                       mcc: MessagesControllerComponents,
                                       posterPage: MoviePoster)
   extends FrontendController(mcc) {
   def getMoviePoster: Action[AnyContent] = Action { implicit request =>
-    Ok(posterPage(MovieRegPoster.form))
+    Ok(posterPage(MovieRegPoster.form.fill(MovieRegPoster(""))))
   }
 
-  def submitMoviePoster(): Action[AnyContent] = Action { implicit request =>
-    MovieRegPoster.form.bindFromRequest().fold({ formWithErrors =>
-      BadRequest(posterPage(formWithErrors))
-    },{ formData =>
-      Ok(posterPage(MovieRegPoster.form))
+  def submitMoviePoster(): Action[AnyContent] = Action.async { implicit request =>
+    MovieRegPoster.form.bindFromRequest().fold({
+      formWithErrors =>
+        Future(BadRequest(posterPage(formWithErrors)))
+    }, { formData =>
+      repo.addPoster(request.session.get("adminId").get, formData.poster).map {
+        case true => Redirect(routes.MovieRatingController.getAgeRating())
+        case false => Unauthorized("error")
+      }.recover {
+        case _ => InternalServerError
+      }
+      //Ok(posterPage(MovieRegPoster.form))
     })
   }
 }

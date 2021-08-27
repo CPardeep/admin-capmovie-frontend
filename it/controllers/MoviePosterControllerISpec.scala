@@ -16,18 +16,23 @@
 
 package controllers
 
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.http.Status.{BAD_REQUEST, OK}
+import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, SEE_OTHER, UNAUTHORIZED}
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.capmovie.controllers.MoviePosterController
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.MoviePoster
 
-class MoviePosterControllerISpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+class MoviePosterControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
 
   val repo: SessionRepo = mock[SessionRepo]
   val posterPage: MoviePoster = app.injector.instanceOf[MoviePoster]
@@ -42,15 +47,33 @@ class MoviePosterControllerISpec extends AnyWordSpec with Matchers with GuiceOne
   "submitMoviePoster" should {
     "return a form value" when {
       "the form is submitted" in {
-        val result = controller.submitMoviePoster().apply(FakeRequest("POST", "/").withFormUrlEncodedBody("poster" -> "testURL"))
-        status(result) shouldBe OK
+        when(repo.addPoster(any(), any())).thenReturn(Future(true))
+        val result = controller.submitMoviePoster().apply(FakeRequest("POST", "/")
+          .withSession("adminId" -> "TESTID")
+          .withFormUrlEncodedBody("poster" -> "testURL"))
+        status(result) shouldBe SEE_OTHER
       }
     }
     "return a bad request" when {
       "the form is submitted with errors" in {
-        val result = controller.submitMoviePoster().apply(FakeRequest("POST", "/").withFormUrlEncodedBody("poster" -> ""))
+        val result = controller.submitMoviePoster().apply(FakeRequest("POST", "/")
+          .withFormUrlEncodedBody("poster" -> ""))
         status(result) shouldBe BAD_REQUEST
       }
+    }
+    "return unauthorized" in {
+      when(repo.addPoster(any(), any())).thenReturn(Future(false))
+      val result = controller.submitMoviePoster().apply(FakeRequest("POST", "/")
+        .withSession("adminId" -> "TESTID")
+        .withFormUrlEncodedBody("poster" -> "testURL"))
+      status(result) shouldBe UNAUTHORIZED
+    }
+    "returns InternalServerError" in {
+      when(repo.addPoster(any(), any())).thenReturn(Future.failed(new RuntimeException))
+      val result = controller.submitMoviePoster().apply(FakeRequest("POST", "/")
+        .withSession("adminId" -> "TESTID")
+        .withFormUrlEncodedBody("poster" -> "testURL"))
+      status(result) shouldBe INTERNAL_SERVER_ERROR
     }
   }
 }
