@@ -17,35 +17,40 @@
 package uk.gov.hmrc.capmovie.controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.capmovie.controllers.predicates.Login
 import uk.gov.hmrc.capmovie.models.MovieRegPoster
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.MoviePoster
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class MoviePosterController @Inject()(repo: SessionRepo,
                                       mcc: MessagesControllerComponents,
-                                      posterPage: MoviePoster)
+                                      posterPage: MoviePoster,
+                                      login: Login
+                                     )
   extends FrontendController(mcc) {
-  def getMoviePoster: Action[AnyContent] = Action { implicit request =>
-    Ok(posterPage(MovieRegPoster.form.fill(MovieRegPoster(""))))
+  def getMoviePoster: Action[AnyContent] = Action async { implicit request =>
+    login.check { _ =>
+      Future.successful(Ok(posterPage(MovieRegPoster.form.fill(MovieRegPoster("")))))
+    }
   }
 
   def submitMoviePoster(): Action[AnyContent] = Action.async { implicit request =>
-    MovieRegPoster.form.bindFromRequest().fold({
-      formWithErrors =>
-        Future(BadRequest(posterPage(formWithErrors)))
-    }, { formData =>
-      repo.addPoster(request.session.get("adminId").get, formData.poster).map {
-        case true => Redirect(routes.MovieRatingController.getAgeRating())
-        case false => Unauthorized("error")
-      }.recover {
-        case _ => InternalServerError
-      }
-      //Ok(posterPage(MovieRegPoster.form))
-    })
+    login.check { id =>
+      MovieRegPoster.form.bindFromRequest().fold({
+        formWithErrors =>
+          Future(BadRequest(posterPage(formWithErrors)))
+      }, { formData =>
+        repo.addPoster(id, formData.poster).map {
+          case true => Redirect(routes.MovieRatingController.getAgeRating())
+          case false => Unauthorized("error")
+        }.recover {
+          case _ => InternalServerError
+        }
+      })
+    }
   }
 }

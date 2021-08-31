@@ -26,6 +26,7 @@ import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, SEE_OTHER, 
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.capmovie.controllers.MovieRatingController
+import uk.gov.hmrc.capmovie.controllers.predicates.Login
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.MovieRating
 
@@ -36,11 +37,13 @@ class MovieRatingControllerISpec extends AnyWordSpec with Matchers with GuiceOne
 
   val repo: SessionRepo = mock[SessionRepo]
   val ageRatingPage: MovieRating = app.injector.instanceOf[MovieRating]
-  val controller = new MovieRatingController(repo, Helpers.stubMessagesControllerComponents(), ageRatingPage)
+  val login: Login = app.injector.instanceOf[Login]
+  val controller = new MovieRatingController(repo, Helpers.stubMessagesControllerComponents(), ageRatingPage, login)
 
   "getMovieAgeRating" should {
     "load the page when called" in {
-      val result = controller.getAgeRating(FakeRequest("GET", "/"))
+      val result = controller.getAgeRating(FakeRequest("GET", "/")
+        .withSession("adminId" -> "TESTID"))
       status(result) shouldBe OK
     }
   }
@@ -58,6 +61,7 @@ class MovieRatingControllerISpec extends AnyWordSpec with Matchers with GuiceOne
   "return a bad request" when {
     "the form is submitted" in {
       val result = controller.submitAgeRating().apply(FakeRequest("POST", "/")
+        .withSession("adminId" -> "TESTID")
         .withFormUrlEncodedBody("rated" -> ""))
       status(result) shouldBe BAD_REQUEST
     }

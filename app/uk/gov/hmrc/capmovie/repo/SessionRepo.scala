@@ -36,7 +36,7 @@ class SessionRepo @Inject()(mongoComponent: MongoComponent) extends PlayMongoRep
 
   def create(movieReg: MovieReg): Future[Boolean] = collection.insertOne(movieReg).toFuture().map {
     response => response.wasAcknowledged && !response.getInsertedId.isNull
-  } recover { case _ => false}
+  } recover { case _ => false }
 
   def addTitle(id: String, title: String): Future[Boolean] = {
     collection.updateOne(
@@ -44,6 +44,7 @@ class SessionRepo @Inject()(mongoComponent: MongoComponent) extends PlayMongoRep
       set("title", title)
     ).toFuture().map(result => result.getModifiedCount == 1 && result.wasAcknowledged())
   }
+
   def addPoster(id: String, poster: String): Future[Boolean] = {
     collection.updateOne(
       Filters.equal("adminId", id),
@@ -65,6 +66,14 @@ class SessionRepo @Inject()(mongoComponent: MongoComponent) extends PlayMongoRep
     ).toFuture().map(result => result.getModifiedCount == 1 && result.wasAcknowledged()
 
     )
+  }
+
+  def clearSession(id: String): Future[Boolean] = {
+    collection.deleteOne(
+      Filters.equal("adminId", id)
+    ).toFuture().map {
+      response => response.wasAcknowledged && response.getDeletedCount == 1
+    }
   }
 }
 

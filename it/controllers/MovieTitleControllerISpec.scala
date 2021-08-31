@@ -42,6 +42,7 @@ import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, SEE_OTHER, 
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.capmovie.controllers.MovieTitleController
+import uk.gov.hmrc.capmovie.controllers.predicates.Login
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.MovieTitle
 
@@ -52,12 +53,14 @@ class MovieTitleControllerISpec extends AnyWordSpec with Matchers with GuiceOneA
 
   val repo: SessionRepo = mock[SessionRepo]
   val namePage: MovieTitle = app.injector.instanceOf[MovieTitle]
-  val controller = new MovieTitleController(repo, Helpers.stubMessagesControllerComponents(), namePage)
+  val login: Login = app.injector.instanceOf[Login]
+  val controller = new MovieTitleController(repo, Helpers.stubMessagesControllerComponents(), namePage, login)
 
   "getMovieTitle" should {
     "load the page when called" in {
       when(repo.create(any())).thenReturn(Future(true))
-      val result = controller.getMovieTitle(FakeRequest("GET", "/"))
+      val result = controller.getMovieTitle(FakeRequest("GET", "/")
+        .withSession("adminId" -> "1001"))
       status(result) shouldBe OK
     }
   }
@@ -67,13 +70,15 @@ class MovieTitleControllerISpec extends AnyWordSpec with Matchers with GuiceOneA
         //when(repo.create(any())).thenReturn(Future(true))
         when(repo.addTitle(any(), any())).thenReturn(Future(true))
         val result = controller.submitMovieTitle().apply(FakeRequest("POST", "/")
-          .withSession("adminId" -> "TESTID").withFormUrlEncodedBody("title" -> "testTitle"))
+          .withSession("adminId" -> "TESTID")
+          .withFormUrlEncodedBody("title" -> "testTitle"))
         status(result) shouldBe SEE_OTHER
       }
     }
     "return a bad request" when {
       "the form is submitted with errors" in {
         val result = controller.submitMovieTitle().apply(FakeRequest("POST", "/")
+          .withSession("adminId" -> "TESTID")
           .withFormUrlEncodedBody("title" -> ""))
         status(result) shouldBe BAD_REQUEST
       }
@@ -82,14 +87,16 @@ class MovieTitleControllerISpec extends AnyWordSpec with Matchers with GuiceOneA
     "return UnAuthorised" in {
       when(repo.addTitle(any(), any())).thenReturn(Future(false))
       val result = controller.submitMovieTitle().apply(FakeRequest("POST", "/")
-        .withSession("adminId" -> "TESTID").withFormUrlEncodedBody("title" -> "testTitle"))
+        .withSession("adminId" -> "TESTID")
+        .withFormUrlEncodedBody("title" -> "testTitle"))
       status(result) shouldBe UNAUTHORIZED
     }
 
     "returns InternalServerError" in {
       when(repo.addTitle(any(), any())).thenReturn(Future.failed(new RuntimeException))
       val result = controller.submitMovieTitle().apply(FakeRequest("POST", "/")
-        .withSession("adminId" -> "TESTID").withFormUrlEncodedBody("title" -> "testTitle"))
+        .withSession("adminId" -> "TESTID")
+        .withFormUrlEncodedBody("title" -> "testTitle"))
       status(result) shouldBe INTERNAL_SERVER_ERROR
     }
   }

@@ -18,36 +18,43 @@ package uk.gov.hmrc.capmovie.controllers
 
 import play.api.i18n.Messages.implicitMessagesProviderToMessages
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.capmovie.controllers.predicates.Login
 import uk.gov.hmrc.capmovie.models.{MovieReg, MovieRegTitle}
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.MovieTitle
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class MovieTitleController @Inject()(repo: SessionRepo,
                                      mcc: MessagesControllerComponents,
-                                     titlePage: MovieTitle)
+                                     titlePage: MovieTitle,
+                                     login: Login
+                                    )
   extends FrontendController(mcc) {
 
-  def getMovieTitle: Action[AnyContent] = Action { implicit request =>
-    repo.create(MovieReg(adminId = request.session.get("adminId").getOrElse("")))
-    Ok(titlePage(MovieRegTitle.form.fill(MovieRegTitle(""))))
+  def getMovieTitle: Action[AnyContent] = Action async { implicit request =>
+    login.check { id =>
+      repo.clearSession(id)
+      repo.create(MovieReg(adminId = id))
+      Future.successful(Ok(titlePage(MovieRegTitle.form.fill(MovieRegTitle("")))))
+    }
   }
 
-  def submitMovieTitle(): Action[AnyContent] = Action.async { implicit request =>
-    MovieRegTitle.form.bindFromRequest().fold({
-      formWithErrors =>
-        Future(BadRequest(titlePage(formWithErrors)))
-    }, { formData =>
-      repo.addTitle(request.session.get("adminId").get, formData.title).map {
-        case true => Redirect(routes.MoviePlotController.getMoviePlot())
-        case false => Unauthorized("error")
-      }.recover {
-        case _ => InternalServerError
-      }
-    })
+  def submitMovieTitle(): Action[AnyContent] = Action async { implicit request =>
+    login.check {
+      id =>
+        MovieRegTitle.form.bindFromRequest().fold({
+          formWithErrors => Future(BadRequest(titlePage(formWithErrors)))
+        }, { formData =>
+          repo.addTitle(id, formData.title).map {
+            case true => Redirect(routes.MoviePlotController.getMoviePlot())
+            case false => Unauthorized("error")
+          }.recover {
+            case _ => InternalServerError
+          }
+        })
+    }
   }
 }

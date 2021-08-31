@@ -26,6 +26,7 @@ import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, SEE_OTHER, 
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.capmovie.controllers.MoviePosterController
+import uk.gov.hmrc.capmovie.controllers.predicates.Login
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.MoviePoster
 
@@ -36,11 +37,13 @@ class MoviePosterControllerSpec extends AnyWordSpec with Matchers with GuiceOneA
 
   val repo: SessionRepo = mock[SessionRepo]
   val posterPage: MoviePoster = app.injector.instanceOf[MoviePoster]
-  val controller = new MoviePosterController(repo, Helpers.stubMessagesControllerComponents(), posterPage)
+  val login: Login = app.injector.instanceOf[Login]
+  val controller = new MoviePosterController(repo, Helpers.stubMessagesControllerComponents(), posterPage, login)
 
   "getMoviePoster" should {
     "load the page when called" in {
-      val result = controller.getMoviePoster(FakeRequest("GET", "/"))
+      val result = controller.getMoviePoster(FakeRequest("GET", "/")
+        .withSession("adminId" -> "TESTID"))
       status(result) shouldBe OK
     }
   }
@@ -57,7 +60,8 @@ class MoviePosterControllerSpec extends AnyWordSpec with Matchers with GuiceOneA
     "return a bad request" when {
       "the form is submitted with errors" in {
         val result = controller.submitMoviePoster().apply(FakeRequest("POST", "/")
-          .withFormUrlEncodedBody("poster" -> ""))
+          .withFormUrlEncodedBody("poster" -> "")
+          .withSession("adminId" -> "TESTID"))
         status(result) shouldBe BAD_REQUEST
       }
     }

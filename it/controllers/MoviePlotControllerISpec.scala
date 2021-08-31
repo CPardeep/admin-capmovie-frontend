@@ -26,6 +26,7 @@ import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, SEE_OTHER, 
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.capmovie.controllers.MoviePlotController
+import uk.gov.hmrc.capmovie.controllers.predicates.Login
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.MoviePlot
 
@@ -36,11 +37,13 @@ class MoviePlotControllerISpec extends AnyWordSpec with Matchers with GuiceOneAp
 
   val repo: SessionRepo = mock[SessionRepo]
   val plotPage: MoviePlot = app.injector.instanceOf[MoviePlot]
-  val controller = new MoviePlotController(repo, Helpers.stubMessagesControllerComponents(), plotPage)
+  val login: Login = app.injector.instanceOf[Login]
+  val controller = new MoviePlotController(repo, Helpers.stubMessagesControllerComponents(), plotPage, login)
 
   "getMoviePlot" should {
     "load the page when called" in {
-      val result = controller.getMoviePlot(FakeRequest("GET", "/"))
+      val result = controller.getMoviePlot(FakeRequest("GET", "/")
+        .withSession("adminId" -> "TESTID"))
       status(result) shouldBe OK
     }
   }
@@ -58,6 +61,7 @@ class MoviePlotControllerISpec extends AnyWordSpec with Matchers with GuiceOneAp
     "return a bad request" when {
       "no form value is submitted" in {
         val result = controller.submitMoviePlot().apply(FakeRequest("POST", "/")
+          .withSession("adminId" -> "TESTID")
           .withFormUrlEncodedBody("plot" -> ""))
         status(result) shouldBe BAD_REQUEST
       }

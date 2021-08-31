@@ -17,36 +17,39 @@
 package uk.gov.hmrc.capmovie.controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.capmovie.controllers.predicates.Login
 import uk.gov.hmrc.capmovie.models.MovieRegRating
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.MovieRating
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-
 class MovieRatingController @Inject()(repo: SessionRepo,
                                       mcc: MessagesControllerComponents,
-                                      ageRatingPage: MovieRating)
+                                      ageRatingPage: MovieRating,
+                                      login: Login)
 
   extends FrontendController(mcc) {
-  def getAgeRating: Action[AnyContent] = Action { implicit request =>
-    Ok(ageRatingPage(MovieRegRating.form.fill(MovieRegRating(""))))
+  def getAgeRating: Action[AnyContent] = Action async { implicit request =>
+    login.check { _ => Future.successful(Ok(ageRatingPage(MovieRegRating.form.fill(MovieRegRating("")))))
+    }
   }
 
-  def submitAgeRating: Action[AnyContent] = Action.async { implicit request =>
-    MovieRegRating.form.bindFromRequest().fold({ formWithErrors =>
-      Future(BadRequest(ageRatingPage(formWithErrors)))
-    }, { formData =>
-      repo.addAgeRating(request.session.get("adminId").get, formData.rating).map {
-        case true => Redirect(routes.MovieRatingController.getAgeRating())
-        case false => Unauthorized("error")
-      }.recover {
-        case _ => InternalServerError
-      }
-    })
+  def submitAgeRating: Action[AnyContent] = Action async { implicit request =>
+    login.check { id =>
+      MovieRegRating.form.bindFromRequest().fold({ formWithErrors =>
+        Future(BadRequest(ageRatingPage(formWithErrors)))
+      }, { formData =>
+        repo.addAgeRating(id, formData.rating).map {
+          case true => Redirect(routes.MovieRatingController.getAgeRating())
+          case false => Unauthorized("error")
+        }.recover {
+          case _ => InternalServerError
+        }
+      })
+    }
   }
 }
 

@@ -17,37 +17,40 @@
 package uk.gov.hmrc.capmovie.controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.capmovie.controllers.predicates.Login
 import uk.gov.hmrc.capmovie.models.MovieRegPlot
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.MoviePlot
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class MoviePlotController @Inject()(repo: SessionRepo,
                                     mcc: MessagesControllerComponents,
-                                    plotPage: MoviePlot)
+                                    plotPage: MoviePlot,
+                                    login: Login)
   extends FrontendController(mcc) {
 
-  def getMoviePlot: Action[AnyContent] = Action { implicit request =>
-    // repo.create(MovieReg(adminId = request.session.get("adminId").getOrElse("")))
-    Ok(plotPage(MovieRegPlot.form.fill(MovieRegPlot(""))))
+  def getMoviePlot: Action[AnyContent] = Action async { implicit request =>
+    login.check { _ =>
+      Future.successful(Ok(plotPage(MovieRegPlot.form.fill(MovieRegPlot("")))))
+    }
   }
 
-  def submitMoviePlot: Action[AnyContent] = Action.async { implicit request =>
-    MovieRegPlot.form.bindFromRequest().fold({ formWithErrors =>
-      Future(BadRequest(plotPage(formWithErrors)))
-    }, { formData =>
-      repo.addPlot(request.session.get("adminId").getOrElse(""), formData.plot).map {
-        case true => Redirect(routes.MoviePosterController.getMoviePoster())
-        case false => Unauthorized("error")
-      }.recover {
-        case _ => InternalServerError
-      }
-    })
+  def submitMoviePlot: Action[AnyContent] = Action async { implicit request =>
+    login.check { id =>
+      MovieRegPlot.form.bindFromRequest().fold({
+        formWithErrors => Future(BadRequest(plotPage(formWithErrors)))
+      }, { formData =>
+        repo.addPlot(id, formData.plot).map {
+          case true => Redirect(routes.MoviePosterController.getMoviePoster())
+          case false => Unauthorized("error")
+        }.recover {
+          case _ => InternalServerError
+        }
+      })
+    }
   }
-
 
 }
