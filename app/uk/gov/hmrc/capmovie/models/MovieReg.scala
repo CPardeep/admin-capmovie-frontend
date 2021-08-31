@@ -41,8 +41,6 @@ object MovieRegTitle {
   )
 }
 
-
-
 case class MovieRegPoster(poster: String)
 
 object MovieRegPoster {
@@ -51,7 +49,6 @@ object MovieRegPoster {
     )(MovieRegPoster.apply)(MovieRegPoster.unapply)
   )
 }
-
 
 case class MovieRegPlot(plot: String)
 
@@ -71,7 +68,6 @@ object MovieRegRating {
   )
 
 }
-
 
 case class MovieRegGenres(genres: String)
 

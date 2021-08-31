@@ -21,33 +21,52 @@ import uk.gov.hmrc.capmovie.models.MovieRegGenres
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.{MovieGenres, MovieGenresConfirmation}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.capmovie.controllers.predicates.Login
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class MovieGenresController @Inject()(repo: SessionRepo,
                                       mcc: MessagesControllerComponents,
                                       genresPage: MovieGenres,
                                       genresConfirmationPage: MovieGenresConfirmation,
+                                      login: Login
                                      )
   extends FrontendController(mcc) {
 
-  def getMovieGenres: Action[AnyContent] = Action { implicit request =>
-    Ok(genresPage(MovieRegGenres.form))
+  def getMovieGenres: Action[AnyContent] = Action async { implicit request =>
+    login.check { _ =>
+      Future.successful(Ok(genresPage(MovieRegGenres.form.fill(MovieRegGenres("")))))
+    }
   }
 
-  def submitMovieGenres(): Action[AnyContent] = Action { implicit request =>
-    MovieRegGenres.form.bindFromRequest().fold({ formWithErrors => BadRequest(genresPage(formWithErrors))
-    }, { formData => Redirect(routes.MovieGenresController.getConfirmationPage())
-    })
+  def submitMovieGenres(): Action[AnyContent] = Action async { implicit request =>
+    login.check { id =>
+      MovieRegGenres.form.bindFromRequest().fold({
+        formWithErrors => Future(BadRequest(genresPage(formWithErrors)))
+      }, { formData =>
+        repo.addGenres(id, formData.genres).map {
+          case true => Redirect(routes.MovieGenresController.getConfirmationPage())
+          case false => Unauthorized("error")
+        }.recover {
+          case _ => InternalServerError
+        }
+      })
+    }
   }
 
   def getConfirmationPage: Action[AnyContent] = Action.async { implicit request =>
-    repo.readOne(request.session.get("adminId").getOrElse("")).map { x =>
-      Ok(genresConfirmationPage(x.get.genres))
+    login.check { _ =>
+      repo.readOne(request.session.get("adminId").getOrElse("")).map { x =>
+        Ok(genresConfirmationPage(x.get.genres))
+      }
     }
   }
+
 }
+
+
 
 
 

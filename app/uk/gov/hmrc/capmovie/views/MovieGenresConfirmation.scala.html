@@ -4,20 +4,32 @@
 @(genresList: List[String] )(implicit request: Request[_], messages: Messages)
 @layout(pageTitle = Some("Genres Confirmation Page")) {
 
+
 <div id="genre-container">
-    <p class="govuk-body">List of genres: </p>
-    @for(genre <- genresList) {
-    <ul class="govuk-list govuk-list--bullet">
-        <li>genre</li>
-    </ul>
-    }
+    <h1 class="govuk-heading-l">Check your list of genres before continuing</h1>
+    <dl class="govuk-summary-list govuk-!-margin-bottom-9">
+        @for(genre <- genresList) {
+        <div class="govuk-summary-list__row">
+            <dd class="govuk-summary-list__value genre">
+                @genre
+            </dd>
+            <dd class="govuk-summary-list__actions">
+                <a class="govuk-link" href="#">
+                    Remove<span class="govuk-visually-hidden"> name</span>
+                </a>
+            </dd>
+        </div>
+        }
+    </dl>
 </div>
 
 <br>
-<p>Do you want to add another genre?</p>
+<h2 class="govuk-heading-m">Accept and continue or add another genre</h2>
 <a id="add-another" href="http://localhost:9000/capmovie/movie-genres/" class="govuk-link">Add another genre</a>
-<button id="no-button" class="govuk-button" data-module="govuk-button">
-    No
-</button>
+<br>
+<br>
+<a id="next-button" class="govuk-button" href="@uk.gov.hmrc.capmovie.controllers.routes.MovieRatingController.getAgeRating()">
+    Continue
+</a>
 
 }

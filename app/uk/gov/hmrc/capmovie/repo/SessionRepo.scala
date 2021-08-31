@@ -81,7 +81,6 @@ class SessionRepo @Inject()(mongoComponent: MongoComponent) extends PlayMongoRep
   def addGenres(id: String, genre: String): Future[Boolean] = {
     collection.updateOne(Filters.equal("adminId", id), addToSet("genres", genre))
       .toFuture().map(result => result.getModifiedCount == 1 && result.wasAcknowledged())
-
   }
 
   def readOne(id: String): Future[Option[MovieReg]] = collection.find(equal("adminId", id)).headOption()
