@@ -14,8 +14,25 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.capmovie
+package uk.gov.hmrc.capmovie.models
 
-package object controllers {
+import play.api.data.Form
+import play.api.data.Forms.{mapping, nonEmptyText}
+import play.api.libs.json.{Json, OFormat}
 
+case class Admin(id: String,
+                 password: String)
+
+object Admin {
+  implicit val format: OFormat[Admin] = Json.format[Admin]
+}
+
+object AdminForm {
+  val form: Form[Admin] =
+    Form(
+      mapping(
+        "id" -> nonEmptyText,
+        "password" -> nonEmptyText
+      )(Admin.apply)(Admin.unapply)
+    )
 }

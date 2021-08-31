@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.capmovie.controllers
+package uk.gov.hmrc.capmovie.controllers.predicates
 
-
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.capmovie.connectors.MovieConnector
+import play.api.mvc.{AnyContent, MessagesControllerComponents, MessagesRequest, Result}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import uk.gov.hmrc.capmovie.views.html.HomePage
-
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import uk.gov.hmrc.capmovie.controllers.routes
+import scala.util.{Failure, Success, Try}
 
-class HomeController @Inject()(mcc: MessagesControllerComponents,
-                               home: HomePage,
-                               connector: MovieConnector
-                              )
-  extends FrontendController(mcc) {
+class Login @Inject()(mcc: MessagesControllerComponents) extends FrontendController(mcc) {
 
-  def homePage: Action[AnyContent] = Action.async { implicit request =>
-    connector.readAll().map(x => Ok(home(x)))
+  def check(func: (String) => Future[Result])(implicit request: MessagesRequest[AnyContent]): Future[Result] = {
+    Try {
+      request.session.get("adminId").get
+    } match {
+      case Success(value) => func(value)
+      case Failure(_) => Future(Redirect(routes.LoginController.getLoginPage()))
+    }
+
   }
 
 }
+
+

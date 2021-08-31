@@ -1,0 +1,32 @@
+@import uk.gov.hmrc.capmovie.models.Admin
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@this(layout: Layout, govukInput : GovukInput, govukErrorSummary : GovukErrorSummary)
+@(form: Form[Admin])(implicit request: Request[_], messages: Messages)
+@layout(pageTitle = Some("Login Page")) {
+<h1 class="govuk-heading-xl">Sign in </h1>
+@if(form.errors.nonEmpty) {
+@defining(form.errors.map { error =>
+ErrorLink(href = Some(s"#${error.key}"), content = Text(messages(error.message, error.args:_*)))
+}) {errorLinks => @govukErrorSummary(ErrorSummary(
+errorList = errorLinks,
+title = Text(messages("There is a problem"))
+))
+}
+}
+@helper.form(uk.gov.hmrc.capmovie.controllers.routes.LoginController.submitLogin(), 'class -> "govuk-body") {
+@if(form.errors("id").nonEmpty) {
+@govukInput(Input(id = "id", name = "id",value = Some(form.data("id")), label = Label(content = Text("Enter id:")), hint = Some(Hint(content = Text("Your id"))), errorMessage = Some(ErrorMessage(content = Text("Enter your id")))))
+@govukInput(Input(inputType = "password", id = "password",name = "password", value = Some(form.data("password")),label = Label(isPageHeading = true,content = Text("Enter Password:"))))
+}else if(form.errors("password").nonEmpty){
+@govukInput(Input(id="id",name = "id",value = Some(form.data("id")),label = Label(isPageHeading = true,content = Text("Enter id:"))))
+@govukInput(Input(id = "password", name = "password",value = Some(form.data("password")), label = Label(content = Text("Enter Password:")), hint = Some(Hint(content = Text("Your Password"))), errorMessage = Some(ErrorMessage(content = Text("Enter your password")))))
+}else{
+@govukInput(Input(id="id",name = "id",value = Some(form.data("id")),label = Label(isPageHeading = true,content = Text("Enter id:"))))
+@govukInput(Input(inputType = "password", id = "password",name = "password", value = Some(form.data("password")),label = Label(isPageHeading = true,content = Text("Enter Password:"))))
+}
+
+<button class="govuk-button" data-module="govuk-button" type="submit" id="submit">
+    Login
+</button>
+}
+}

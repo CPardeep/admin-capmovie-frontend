@@ -18,33 +18,31 @@ package uk.gov.hmrc.capmovie.controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.capmovie.controllers.predicates.Login
-import uk.gov.hmrc.capmovie.models.MovieRegPoster
+import uk.gov.hmrc.capmovie.models.MovieRegRating
 import uk.gov.hmrc.capmovie.repo.SessionRepo
-import uk.gov.hmrc.capmovie.views.html.MoviePoster
+import uk.gov.hmrc.capmovie.views.html.MovieRating
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class MoviePosterController @Inject()(repo: SessionRepo,
+class MovieRatingController @Inject()(repo: SessionRepo,
                                       mcc: MessagesControllerComponents,
-                                      posterPage: MoviePoster,
-                                      login: Login
-                                     )
+                                      ageRatingPage: MovieRating,
+                                      login: Login)
+
   extends FrontendController(mcc) {
-  def getMoviePoster: Action[AnyContent] = Action async { implicit request =>
-    login.check { _ =>
-      Future.successful(Ok(posterPage(MovieRegPoster.form.fill(MovieRegPoster("")))))
+  def getAgeRating: Action[AnyContent] = Action async { implicit request =>
+    login.check { _ => Future.successful(Ok(ageRatingPage(MovieRegRating.form.fill(MovieRegRating("")))))
     }
   }
 
-  def submitMoviePoster(): Action[AnyContent] = Action.async { implicit request =>
+  def submitAgeRating: Action[AnyContent] = Action async { implicit request =>
     login.check { id =>
-      MovieRegPoster.form.bindFromRequest().fold({
-        formWithErrors =>
-          Future(BadRequest(posterPage(formWithErrors)))
+      MovieRegRating.form.bindFromRequest().fold({ formWithErrors =>
+        Future(BadRequest(ageRatingPage(formWithErrors)))
       }, { formData =>
-        repo.addPoster(id, formData.poster).map {
+        repo.addAgeRating(id, formData.rating).map {
           case true => Redirect(routes.MovieRatingController.getAgeRating())
           case false => Unauthorized("error")
         }.recover {
@@ -54,3 +52,6 @@ class MoviePosterController @Inject()(repo: SessionRepo,
     }
   }
 }
+
+
+
