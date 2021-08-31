@@ -1,0 +1,35 @@
+@import uk.gov.hmrc.capmovie.models.MovieReg
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@this(layout: Layout, govukInput : GovukInput, govukErrorSummary : GovukErrorSummary)
+@(genresList: List[String] )(implicit request: Request[_], messages: Messages)
+@layout(pageTitle = Some("Genres Confirmation Page")) {
+
+
+<div id="genre-container">
+    <h1 class="govuk-heading-l">Check your list of genres before continuing</h1>
+    <dl class="govuk-summary-list govuk-!-margin-bottom-9">
+        @for(genre <- genresList) {
+        <div class="govuk-summary-list__row">
+            <dd class="govuk-summary-list__value genre">
+                @genre
+            </dd>
+            <dd class="govuk-summary-list__actions">
+                <a class="govuk-link" href="#">
+                    Remove<span class="govuk-visually-hidden"> name</span>
+                </a>
+            </dd>
+        </div>
+        }
+    </dl>
+</div>
+
+<br>
+<h2 class="govuk-heading-m">Accept and continue or add another genre</h2>
+<a id="add-another" href="http://localhost:9000/capmovie/movie-genres/" class="govuk-link">Add another genre</a>
+<br>
+<br>
+<a id="next-button" class="govuk-button" href="@uk.gov.hmrc.capmovie.controllers.routes.MovieRatingController.getAgeRating()">
+    Continue
+</a>
+
+}

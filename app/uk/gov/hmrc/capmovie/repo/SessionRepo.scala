@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.capmovie.repo
 
+import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.Indexes.ascending
-import org.mongodb.scala.model.Updates.set
+import org.mongodb.scala.model.Updates.{addToSet, set}
 import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions}
 import uk.gov.hmrc.capmovie.models.MovieReg
 import uk.gov.hmrc.mongo.MongoComponent
@@ -44,6 +45,7 @@ class SessionRepo @Inject()(mongoComponent: MongoComponent) extends PlayMongoRep
       set("title", title)
     ).toFuture().map(result => result.getModifiedCount == 1 && result.wasAcknowledged())
   }
+
 
   def addPoster(id: String, poster: String): Future[Boolean] = {
     collection.updateOne(
@@ -75,5 +77,14 @@ class SessionRepo @Inject()(mongoComponent: MongoComponent) extends PlayMongoRep
       response => response.wasAcknowledged && response.getDeletedCount == 1
     }
   }
+
+  def addGenres(id: String, genre: String): Future[Boolean] = {
+    collection.updateOne(Filters.equal("adminId", id), addToSet("genres", genre))
+      .toFuture().map(result => result.getModifiedCount == 1 && result.wasAcknowledged())
+  }
+
+  def readOne(id: String): Future[Option[MovieReg]] = collection.find(equal("adminId", id)).headOption()
+
+
 }
 

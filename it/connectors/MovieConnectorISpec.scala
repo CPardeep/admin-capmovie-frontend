@@ -40,9 +40,9 @@ class MovieConnectorISpec extends AnyWordSpec with Matchers with GuiceOneServerP
   val movieReg: MovieReg = MovieReg(
     adminId = "TESTMOV",
     plot = Some("Test plot"),
-    genres = Some(List(
+    genres = List(
       "testGenre1",
-      "testGenre2")),
+      "testGenre2"),
     rated = Some("testRating"),
     cast = Some(List(
       "testPerson",
