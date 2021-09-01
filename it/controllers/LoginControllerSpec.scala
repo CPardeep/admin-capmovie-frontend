@@ -37,7 +37,6 @@ class LoginControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerS
   val connector: MovieConnector = mock[MovieConnector]
   val controller = new LoginController(Helpers.stubMessagesControllerComponents(), connector, login)
 
-
   "getLoginPage" should {
     "load the page when called" in {
       val result = controller.getLoginPage(FakeRequest("GET", "/"))
@@ -72,4 +71,11 @@ class LoginControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerS
     }
   }
 
+  "logout" should {
+    "load the page when called" in {
+      val result = controller.logout().apply(FakeRequest("GET", "/"))
+      status(result) shouldBe SEE_OTHER
+      session(result) shouldBe empty
+    }
+  }
 }

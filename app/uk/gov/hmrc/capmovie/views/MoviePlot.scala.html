@@ -2,7 +2,8 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @this(layout: Layout, govukTextarea : GovukTextarea, govukErrorSummary : GovukErrorSummary)
 @(form: Form[MovieRegPlot])(implicit request: Request[_], messages: Messages)
-@layout(pageTitle = Some("Add a Plot")) {
+
+@layout(pageTitle = Some("Add a Plot"), isLoggedIn = true) {
 @if(form.errors.nonEmpty) {
 @defining(form.errors.map { error =>
 ErrorLink(href = Some(s"#${error.key}"), content = Text(messages(error.message, error.args:_*)))

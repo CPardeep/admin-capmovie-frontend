@@ -2,7 +2,7 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @this(layout: Layout, govukInput : GovukInput, govukErrorSummary : GovukErrorSummary)
 @(movieList: List[Movie] )(implicit request: Request[_], messages: Messages)
-@layout(pageTitle = Some("Home Page")) {
+@layout(pageTitle = Some("Home Page"), isLoggedIn = true) {
 <div id="movie-container">
 @for(movie <- movieList){
 <div class="movie-card">
