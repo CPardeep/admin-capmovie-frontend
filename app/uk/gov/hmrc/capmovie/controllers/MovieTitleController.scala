@@ -49,7 +49,7 @@ class MovieTitleController @Inject()(repo: SessionRepo,
           formWithErrors => Future(BadRequest(titlePage(formWithErrors)))
         }, { formData =>
           repo.addTitle(id, formData.title).map {
-            case true => Redirect(routes.MoviePlotController.getMoviePlot())
+            case true => Redirect(routes.MovieGenresController.getMovieGenres())
             case false => Unauthorized("error")
           }.recover {
             case _ => InternalServerError
