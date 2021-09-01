@@ -24,7 +24,7 @@ case class MovieReg(adminId: String,
                     plot: Option[String] = None,
                     genres: List[String] = List(),
                     rated: Option[String] = None,
-                    cast: Option[List[String]] = None,
+                    cast: List[String] = List(),
                     poster: Option[String] = None,
                     title: Option[String] = None)
 
@@ -78,4 +78,13 @@ object MovieRegGenres {
   )
 }
 
+
+case class MovieRegCast(cast: String)
+
+object MovieRegCast {
+  val form: Form[MovieRegCast] = Form(
+    mapping("cast" -> text.verifying("cannot leave empty", _.nonEmpty)
+    )(MovieRegCast.apply)(MovieRegCast.unapply)
+  )
+}
 

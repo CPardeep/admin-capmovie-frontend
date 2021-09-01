@@ -29,9 +29,9 @@ class MovieRegSpec extends AnyWordSpec with Matchers {
       "testGenre1",
       "testGenre2"),
     rated = Some("testRating"),
-    cast = Some(List(
+    cast = List(
       "testPerson",
-      "TestPerson")),
+      "TestPerson"),
     poster = Some("testURL"),
     title = Some("testTitle"))
 
