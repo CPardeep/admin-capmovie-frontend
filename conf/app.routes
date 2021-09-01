@@ -32,6 +32,11 @@ GET        /age-rating                      uk.gov.hmrc.capmovie.controllers.Mov
 +nocsrf
 POST       /age-rating                      uk.gov.hmrc.capmovie.controllers.MovieRatingController.submitAgeRating()
 
+GET        /summary                         uk.gov.hmrc.capmovie.controllers.MovieSummaryController.getSummary()
++nocsrf
+GET       /submit                         uk.gov.hmrc.capmovie.controllers.MovieSummaryController.submitSummary()
+
+GET        /confirmation                    uk.gov.hmrc.capmovie.controllers.MovieSummaryController.confirmation()
 
 GET        /login                           uk.gov.hmrc.capmovie.controllers.LoginController.getLoginPage
 +nocsrf

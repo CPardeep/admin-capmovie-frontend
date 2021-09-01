@@ -1,0 +1,30 @@
+@this(layout: Layout, govukButton: GovukButton)
+
+@()(implicit request: Request[_], messages: Messages)
+
+@layout(pageTitle = Some("Add a Movie Success")) {
+
+<div class="govuk-width-container">
+  <main class="govuk-main-wrapper govuk-main-wrapper--l" id="main-content" role="main">
+
+    <div class="govuk-panel govuk-panel--confirmation">
+      <h1 class="govuk-panel__title">
+        Successful
+      </h1>
+      <div class="govuk-panel__body">
+        Movie added
+      </div>
+    </div>
+    <h2 class="govuk-heading-m">What happens next</h2>
+
+    <p class="govuk-body">You have now added a movie.</p>
+    <p class="govuk-body">The movie will now appear on your homepage</p>
+
+    <a id="add-another-movie-button" class="govuk-button" href="@uk.gov.hmrc.capmovie.controllers.routes.MovieTitleController.getMovieTitle()">Add another Movie</a>
+    </br>
+    <a href="http://localhost:9000/capmovie/home" class="govuk-link">Return to home</a>
+
+  </main>
+</div>
+
+}
