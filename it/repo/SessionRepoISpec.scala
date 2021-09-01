@@ -59,6 +59,7 @@ class SessionRepoISpec extends AnyWordSpec with Matchers with ScalaFutures with 
     }
   }
 
+
   "addPlot" should {
     "return true when plot details have been submitted" in {
       await(repository.create(MovieReg("testId")))
@@ -78,6 +79,17 @@ class SessionRepoISpec extends AnyWordSpec with Matchers with ScalaFutures with 
     "return false when wrong ID is submitted" in {
       await(repository.create(MovieReg("testId")))
       await(repository.addAgeRating("falseId", "testRating")) shouldBe false
+    }
+  }
+
+  "clearSession" should {
+    "true if correct if was given to remove document" in {
+      await(repository.create(MovieReg("testId")))
+      await(repository.clearSession("testId")) shouldBe true
+    }
+    "return false if the wrong id was given to remove document " in {
+      await(repository.create(MovieReg("tes")))
+      await(repository.clearSession("testId")) shouldBe false
     }
   }
 
@@ -107,9 +119,6 @@ class SessionRepoISpec extends AnyWordSpec with Matchers with ScalaFutures with 
       await(repository.create(MovieReg("testId")))
       await(repository.readOne("falseId")).size shouldBe 0
     }
-
-
   }
-
 
 }

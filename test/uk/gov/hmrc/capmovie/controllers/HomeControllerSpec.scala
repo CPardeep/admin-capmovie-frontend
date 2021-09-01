@@ -25,16 +25,17 @@ import play.api.http.Status.OK
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.capmovie.connectors.MovieConnector
+import uk.gov.hmrc.capmovie.controllers.predicates.Login
 import uk.gov.hmrc.capmovie.models.Movie
 import uk.gov.hmrc.capmovie.views.html.HomePage
-
 import scala.concurrent.Future
 
 class HomeControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
 
   val home: HomePage = app.injector.instanceOf[HomePage]
   val connector: MovieConnector = mock[MovieConnector]
-  val controller = new HomeController(Helpers.stubMessagesControllerComponents(), home, connector)
+  val login: Login = app.injector.instanceOf[Login]
+  val controller = new HomeController(Helpers.stubMessagesControllerComponents(), home, connector, login)
 
   val movie: Movie = Movie(
     id = "TESTMOV",
@@ -52,7 +53,8 @@ class HomeControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSu
   "homePage" should {
     "load movieList" in {
       when(connector.readAll()) thenReturn Future.successful(List(movie))
-      val result = controller.homePage(FakeRequest("GET", "/"))
+      val result = controller.homePage(FakeRequest("GET", "/")
+        .withSession("adminId" -> "TESTID"))
       status(result) shouldBe OK
     }
   }

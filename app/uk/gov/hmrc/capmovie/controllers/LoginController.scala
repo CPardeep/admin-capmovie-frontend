@@ -22,15 +22,13 @@ import uk.gov.hmrc.capmovie.connectors.MovieConnector
 import uk.gov.hmrc.capmovie.models.{Admin, AdminForm}
 import uk.gov.hmrc.capmovie.views.html.LoginPage
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class LoginController @Inject()(mcc: MessagesControllerComponents,
                                 movieConnector: MovieConnector,
-                                login: LoginPage
-                               )
+                                login: LoginPage)
   extends FrontendController(mcc) {
 
   def getLoginPage: Action[AnyContent] = Action { implicit request =>
@@ -43,12 +41,16 @@ class LoginController @Inject()(mcc: MessagesControllerComponents,
       Future.successful(BadRequest(login(formWithErrors)))
     }, success => {
       movieConnector.login(success).map {
-        case 200 => Redirect(routes.HomeController.homePage()).withNewSession.withSession("adminId" -> success.id)
+        case 200 => Redirect(routes.HomeController.homePage()).withSession("adminId" -> success.id)
         case 401 => Unauthorized(login(AdminForm.form.fill(Admin("", ""))))
       }.recover {
         case _ =>  InternalServerError
       }
     })
+  }
+
+  def logout(): Action[AnyContent] = Action {
+    Redirect(routes.LoginController.getLoginPage()).withNewSession
   }
 
 

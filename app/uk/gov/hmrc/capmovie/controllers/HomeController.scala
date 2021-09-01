@@ -16,23 +16,23 @@
 
 package uk.gov.hmrc.capmovie.controllers
 
-
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.capmovie.connectors.MovieConnector
+import uk.gov.hmrc.capmovie.controllers.predicates.Login
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import uk.gov.hmrc.capmovie.views.html.HomePage
-
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class HomeController @Inject()(mcc: MessagesControllerComponents,
                                home: HomePage,
-                               connector: MovieConnector
-                              )
+                               connector: MovieConnector,
+                               login: Login)
   extends FrontendController(mcc) {
 
-  def homePage: Action[AnyContent] = Action.async { implicit request =>
-    connector.readAll().map(x => Ok(home(x)))
+  def homePage: Action[AnyContent] = Action async { implicit request =>
+    login.check { _ => connector.readAll().map(x => Ok(home(x)))
+    }
   }
 
 }

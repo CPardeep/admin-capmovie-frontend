@@ -2,7 +2,7 @@
 @import uk.gov.hmrc.capmovie.models.MovieRegRating
 @this(layout: Layout, govukRadios : GovukRadios, govukErrorSummary : GovukErrorSummary)
 @(form: Form[MovieRegRating])(implicit request: Request[_], messages: Messages)
-@layout(pageTitle = Some("Age Rating")){
+@layout(pageTitle = Some("Age Rating"), isLoggedIn = true){
 
 <h1 class="govuk-heading-xl" id="Name Value">Please select the age rating of the film:</h1>
 @if(form.errors.nonEmpty){
