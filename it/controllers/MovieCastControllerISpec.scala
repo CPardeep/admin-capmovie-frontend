@@ -41,61 +41,72 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, SEE_OTHER, UNAUTHORIZED}
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Helpers}
-import uk.gov.hmrc.capmovie.controllers.MovieTitleController
+import uk.gov.hmrc.capmovie.controllers.MovieCastController
 import uk.gov.hmrc.capmovie.controllers.predicates.Login
+import uk.gov.hmrc.capmovie.models.MovieReg
 import uk.gov.hmrc.capmovie.repo.SessionRepo
-import uk.gov.hmrc.capmovie.views.html.MovieTitle
+import uk.gov.hmrc.capmovie.views.html.MovieCast
+import uk.gov.hmrc.capmovie.views.html.MovieCastConfirmation
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class MovieTitleControllerISpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
+class MovieCastControllerISpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
 
   val repo: SessionRepo = mock[SessionRepo]
-  val titlePage: MovieTitle = app.injector.instanceOf[MovieTitle]
+  val castPage: MovieCast = app.injector.instanceOf[MovieCast]
+  val confirmPage: MovieCastConfirmation = app.injector.instanceOf[MovieCastConfirmation]
   val login: Login = app.injector.instanceOf[Login]
-  val controller = new MovieTitleController(repo, Helpers.stubMessagesControllerComponents(), titlePage, login)
+  val controller = new MovieCastController(repo, Helpers.stubMessagesControllerComponents(), castPage, confirmPage, login)
 
-  "getMovieTitle" should {
+  "getMovieCast" should {
     "load the page when called" in {
-      when(repo.create(any())).thenReturn(Future(true))
-      val result = controller.getMovieTitle(FakeRequest("GET", "/")
-        .withSession("adminId" -> "1001"))
+      val result = controller.getMovieCast(FakeRequest("GET", "/")
+        .withSession("adminId" -> "TESTID"))
       status(result) shouldBe OK
     }
   }
-  "submitMovieTitle" should {
+  "submitMovieCast" should {
     "return a form value" when {
       "the form is submitted" in {
-        when(repo.addTitle(any(), any())).thenReturn(Future(true))
-        val result = controller.submitMovieTitle().apply(FakeRequest("POST", "/")
+        when(repo.addCast(any(), any())).thenReturn(Future(true))
+        val result = controller.submitMovieCast().apply(FakeRequest("POST", "/")
           .withSession("adminId" -> "TESTID")
-          .withFormUrlEncodedBody("title" -> "testTitle"))
+          .withFormUrlEncodedBody("cast" -> "testCast"))
         status(result) shouldBe SEE_OTHER
       }
     }
     "return a bad request" when {
-      "the form is submitted with errors" in {
-        val result = controller.submitMovieTitle().apply(FakeRequest("POST", "/")
+      "the form is submitted" in {
+        val result = controller.submitMovieCast().apply(FakeRequest("POST", "/")
           .withSession("adminId" -> "TESTID")
-          .withFormUrlEncodedBody("title" -> ""))
+          .withFormUrlEncodedBody("cast" -> ""))
         status(result) shouldBe BAD_REQUEST
       }
     }
-
-    "return UnAuthorised" in {
-      when(repo.addTitle(any(), any())).thenReturn(Future(false))
-      val result = controller.submitMovieTitle().apply(FakeRequest("POST", "/")
+    "return Unauthorised" in {
+      when(repo.addCast(any(), any())).thenReturn(Future(false))
+      val result = controller.submitMovieCast().apply(FakeRequest("POST", "/")
         .withSession("adminId" -> "TESTID")
-        .withFormUrlEncodedBody("title" -> "testTitle"))
+        .withFormUrlEncodedBody("cast" -> "testCast"))
       status(result) shouldBe UNAUTHORIZED
     }
 
-    "returns InternalServerError" in {
-      when(repo.addTitle(any(), any())).thenReturn(Future.failed(new RuntimeException))
-      val result = controller.submitMovieTitle().apply(FakeRequest("POST", "/")
+    "return InternalServerError" in {
+      when(repo.addCast(any(), any())).thenReturn(Future.failed(new RuntimeException))
+      val result = controller.submitMovieCast().apply(FakeRequest("POST", "/")
         .withSession("adminId" -> "TESTID")
-        .withFormUrlEncodedBody("title" -> "testTitle"))
+        .withFormUrlEncodedBody("cast" -> "testCast"))
       status(result) shouldBe INTERNAL_SERVER_ERROR
+    }
+    "getConfirmationPage" should {
+      "load MovieCastConfirmation Page" in {
+        when(repo.readOne(any()))
+          .thenReturn(Future.successful(Some(MovieReg("testId", cast =  List("actor1", "actor2")))))
+        val result = controller.getConfirmationPage(FakeRequest("GET", "/")
+          .withSession("adminId" -> "testId"))
+        status(result) shouldBe OK
+      }
     }
   }
 }

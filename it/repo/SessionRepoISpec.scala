@@ -109,7 +109,16 @@ class SessionRepoISpec extends AnyWordSpec with Matchers with ScalaFutures with 
       await(repository.addGenres("falseId", "genre1")) shouldBe false
     }
   }
-
+  "addCast" should {
+    "return true when valid details are submitted" in {
+      await(repository.create(MovieReg("testId")))
+      await(repository.addCast("testId", "Actor")) shouldBe true
+    }
+    "return false when wrong ID is submitted" in {
+      await(repository.create(MovieReg("testId")))
+      await(repository.addCast("falseId", "Actor")) shouldBe false
+    }
+  }
   "readOne" should {
     "return 1 when valid adminId is submitted" in {
       await(repository.create(MovieReg("testId")))
@@ -119,6 +128,7 @@ class SessionRepoISpec extends AnyWordSpec with Matchers with ScalaFutures with 
       await(repository.create(MovieReg("testId")))
       await(repository.readOne("falseId")).size shouldBe 0
     }
-  }
 
+
+  }
 }

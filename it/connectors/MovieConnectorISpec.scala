@@ -44,9 +44,9 @@ class MovieConnectorISpec extends AnyWordSpec with Matchers with GuiceOneServerP
       "testGenre1",
       "testGenre2"),
     rated = Some("testRating"),
-    cast = Some(List(
+    cast = List(
       "testPerson",
-      "TestPerson")),
+      "TestPerson"),
     poster = Some("testURL"),
     title = Some("testTitle"))
 

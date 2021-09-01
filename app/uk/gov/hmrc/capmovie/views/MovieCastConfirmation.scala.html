@@ -1,0 +1,22 @@
+@import uk.gov.hmrc.capmovie.models.{MovieRegCast, MovieReg}
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@this(layout: Layout, govukInput : GovukInput, govukErrorSummary : GovukErrorSummary)
+@(movieList: List[String] )(implicit request: Request[_], messages: Messages)
+@layout(pageTitle = Some("Cast Confirmation Page")) {
+<div id="movie-container">
+    @for(movie <- movieList){
+    <div class="movie-card">
+        <p> @movie</p>
+    </div>
+    }
+</div>
+<br>
+<a class="govuk-link cancel" data-module="govuk-button" href="@uk.gov.hmrc.capmovie.controllers.routes.MovieCastController.getMovieCast()">
+    Add another cast member
+</a>
+<br>
+<a class="govuk-button" href="@uk.gov.hmrc.capmovie.controllers.routes.MoviePosterController.getMoviePoster()">
+    Continue
+</a>
+
+}

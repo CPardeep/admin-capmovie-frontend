@@ -14,6 +14,10 @@ GET        /movie-title                     uk.gov.hmrc.capmovie.controllers.Mov
 +nocsrf
 POST       /movie-title                     uk.gov.hmrc.capmovie.controllers.MovieTitleController.submitMovieTitle()
 
+GET        /movie-cast                      uk.gov.hmrc.capmovie.controllers.MovieCastController.getMovieCast()
+GET        /movie-cast/confirmation         uk.gov.hmrc.capmovie.controllers.MovieCastController.getConfirmationPage()
++nocsrf
+POST       /movie-cast                      uk.gov.hmrc.capmovie.controllers.MovieCastController.submitMovieCast()
 
 GET        /movie-poster                    uk.gov.hmrc.capmovie.controllers.MoviePosterController.getMoviePoster()
 +nocsrf
@@ -32,8 +36,6 @@ POST       /age-rating                      uk.gov.hmrc.capmovie.controllers.Mov
 GET        /login                           uk.gov.hmrc.capmovie.controllers.LoginController.getLoginPage
 +nocsrf
 POST       /login                           uk.gov.hmrc.capmovie.controllers.LoginController.submitLogin
-
-GET        /home                            uk.gov.hmrc.capmovie.controllers.HomeController.homePage
 
 GET        /movie-genres                    uk.gov.hmrc.capmovie.controllers.MovieGenresController.getMovieGenres()
 +nocsrf

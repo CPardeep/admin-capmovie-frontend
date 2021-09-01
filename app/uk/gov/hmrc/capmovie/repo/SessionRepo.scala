@@ -83,8 +83,14 @@ class SessionRepo @Inject()(mongoComponent: MongoComponent) extends PlayMongoRep
       .toFuture().map(result => result.getModifiedCount == 1 && result.wasAcknowledged())
   }
 
-  def readOne(id: String): Future[Option[MovieReg]] = collection.find(equal("adminId", id)).headOption()
+  def addCast(id: String, cast: String): Future[Boolean] = {
+    collection.updateOne(
+      Filters.equal("adminId", id),
+      addToSet("cast", cast)
+    ).toFuture().map(result => result.getModifiedCount == 1 && result.wasAcknowledged())
+  }
+
+  def readOne(id: String): Future[Option[MovieReg]] = collection.find(equal("adminId", id)).headOption
 
 
 }
-
