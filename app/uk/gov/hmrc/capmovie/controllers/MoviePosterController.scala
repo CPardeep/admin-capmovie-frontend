@@ -45,7 +45,7 @@ class MoviePosterController @Inject()(repo: SessionRepo,
           Future(BadRequest(posterPage(formWithErrors)))
       }, { formData =>
         repo.addPoster(id, formData.poster).map {
-          case true => Redirect(routes.MovieRatingController.getAgeRating())
+          case true => Redirect(routes.MovieCastController.getMovieCast())
           case false => Unauthorized("error")
         }.recover {
           case _ => InternalServerError

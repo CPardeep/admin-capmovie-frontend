@@ -43,7 +43,7 @@ class MovieRatingController @Inject()(repo: SessionRepo,
         Future(BadRequest(ageRatingPage(formWithErrors)))
       }, { formData =>
         repo.addAgeRating(id, formData.rating).map {
-          case true => Redirect(routes.MovieRatingController.getAgeRating())
+          case true => Redirect(routes.MoviePlotController.getMoviePlot())
           case false => Unauthorized("error")
         }.recover {
           case _ => InternalServerError
