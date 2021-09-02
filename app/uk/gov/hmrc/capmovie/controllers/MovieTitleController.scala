@@ -36,7 +36,6 @@ class MovieTitleController @Inject()(repo: SessionRepo,
 
   def getMovieTitle: Action[AnyContent] = Action async { implicit request =>
     login.check { id =>
-      repo.clearSession(id)
       repo.create(MovieReg(adminId = id))
       Future.successful(Ok(titlePage(MovieRegTitle.form.fill(MovieRegTitle("")))))
     }
