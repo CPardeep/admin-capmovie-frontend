@@ -41,7 +41,7 @@ class LoginController @Inject()(mcc: MessagesControllerComponents,
       Future.successful(BadRequest(login(formWithErrors)))
     }, success => {
       movieConnector.login(success).map {
-        case 200 => Redirect(routes.HomeController.homePage()).withSession("adminId" -> success.id)
+        case 200 => Redirect("http://localhost:9001/capmovie/home").withSession("adminId" -> success.id)
         case 401 => Unauthorized(login(AdminForm.form.fill(Admin("", ""))))
       }.recover {
         case _ =>  InternalServerError
@@ -52,6 +52,5 @@ class LoginController @Inject()(mcc: MessagesControllerComponents,
   def logout(): Action[AnyContent] = Action {
     Redirect(routes.LoginController.getLoginPage()).withNewSession
   }
-
 
 }
