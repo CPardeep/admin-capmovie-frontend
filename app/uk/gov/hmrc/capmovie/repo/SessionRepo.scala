@@ -18,7 +18,7 @@ package uk.gov.hmrc.capmovie.repo
 
 import org.mongodb.scala.model.Filters.equal
 import org.mongodb.scala.model.Indexes.ascending
-import org.mongodb.scala.model.Updates.{addToSet, set}
+import org.mongodb.scala.model.Updates.{addToSet, pull, set}
 import org.mongodb.scala.model.{Filters, IndexModel, IndexOptions}
 import uk.gov.hmrc.capmovie.models.MovieReg
 import uk.gov.hmrc.mongo.MongoComponent
@@ -80,6 +80,11 @@ class SessionRepo @Inject()(mongoComponent: MongoComponent) extends PlayMongoRep
 
   def addGenres(id: String, genre: String): Future[Boolean] = {
     collection.updateOne(Filters.equal("adminId", id), addToSet("genres", genre))
+      .toFuture().map(result => result.getModifiedCount == 1 && result.wasAcknowledged())
+  }
+
+  def removeGenre(id: String, genre: String): Future[Boolean] = {
+    collection.updateOne(Filters.equal("adminId", id), pull("genres", genre))
       .toFuture().map(result => result.getModifiedCount == 1 && result.wasAcknowledged())
   }
 

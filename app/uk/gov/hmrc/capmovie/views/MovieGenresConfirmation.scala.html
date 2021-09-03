@@ -5,17 +5,18 @@
 @layout(pageTitle = Some("Genres Confirmation Page")) {
 
 
-<div id="genre-container">
+<div>
     <h1 class="govuk-heading-l">Check your list of genres before continuing</h1>
-    <dl class="govuk-summary-list govuk-!-margin-bottom-9">
-        @for(genre <- genresList) {
+
+    <dl id="genres-list" class="govuk-summary-list govuk-!-margin-bottom-9">
+        @for((genre,index) <- genresList.zipWithIndex) {
         <div class="govuk-summary-list__row">
-            <dd class="govuk-summary-list__value genre">
+            <dd id=genre[@index] class="govuk-summary-list__value genre">
                 @genre
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a class="govuk-link" href="#">
-                    Remove<span class="govuk-visually-hidden"> name</span>
+                <a class="govuk-link" href="http://localhost:9000/capmovie/movie-genres/confirmation/@genre">
+                    Remove<span class="govuk-visually-hidden">@genre</span>
                 </a>
             </dd>
         </div>

@@ -64,10 +64,19 @@ class MovieGenresController @Inject()(repo: SessionRepo,
     }
   }
 
+  def deleteGenre(genre: String): Action[AnyContent] = Action.async { implicit request =>
+    login.check { _ =>
+      for {
+        deleted <- repo.removeGenre(request.session.get("adminId").getOrElse(""), genre)
+        optMovie <- repo.readOne(request.session.get("adminId").getOrElse(""))
+      } yield optMovie match {
+        case Some(movie) => if (movie.genres.nonEmpty) Redirect(routes.MovieGenresController.getConfirmationPage())
+        else Redirect(routes.MovieGenresController.getMovieGenres())
+       case _ => InternalServerError
+      }
+    }
+  }
+
+
 }
-
-
-
-
-
 
