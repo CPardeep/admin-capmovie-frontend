@@ -1,9 +1,9 @@
 @import uk.gov.hmrc.capmovie.models.MovieRegTitle
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @this(layout: Layout, govukInput : GovukInput, govukErrorSummary : GovukErrorSummary)
-@(form: Form[MovieRegTitle], isSessionUpdate: Boolean)(implicit request: Request[_], messages: Messages)
+@(form: Form[MovieRegTitle], isSessionUpdate: Boolean, isUpdate: Boolean, movieId: String)(implicit request: Request[_], messages: Messages)
 
-@layout(pageTitle = Some("Title Page"), isLoggedIn = true) {
+@layout(pageTitle = Some("Title Page")) {
 
 @if(form.errors.nonEmpty) {
 @defining(form.errors.map { error =>
@@ -14,7 +14,8 @@ title = Text(messages("There is a problem"))
 ))
 }
 }
-@helper.form(uk.gov.hmrc.capmovie.controllers.routes.MovieTitleController.submitMovieTitle(isSessionUpdate)) {
+
+@if(isUpdate == true) { @helper.form(uk.gov.hmrc.capmovie.controllers.routes.MovieTitleController.updateMovieTitle(movieId)) {
 <div class="govuk-form-group">
     @if(form.errors("title").nonEmpty) {
     @govukInput(Input(
@@ -47,5 +48,40 @@ title = Text(messages("There is a problem"))
         Continue
     </button>
 </div>
+}
+} else { @helper.form(uk.gov.hmrc.capmovie.controllers.routes.MovieTitleController.submitMovieTitle(isSessionUpdate)) {
+<div class="govuk-form-group">
+    @if(form.errors("title").nonEmpty) {
+    @govukInput(Input(
+    id = "title",
+    name = "title",
+    hint = Some(Hint(content = Text(""))),
+    errorMessage = Some(ErrorMessage(
+    content = Text("What is the title of the movie?"))),
+    label = Label(
+    isPageHeading = true,
+    classes = "govuk-label--l",
+    content = Text("title")
+    )
+    ))
+    } else {
+    @govukInput(Input(
+    id = "title",
+    name = "title",
+    value = Some(form.data("title")),
+    hint = Some(Hint(content = Text(""))),
+    label = Label(
+    isPageHeading = true,
+    classes = "govuk-label--l",
+    content = Text("What is the title of the movie?")
+    )
+    ))
+    }
+    <br>
+    <button id="next-button" class="govuk-button" data-module="govuk-button">
+        Continue
+    </button>
+</div>
+}
 }
 }

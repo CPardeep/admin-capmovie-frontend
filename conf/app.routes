@@ -1,7 +1,7 @@
 # microservice specific routes
 
-->         /govuk-frontend                  govuk.Routes
-->         /hmrc-frontend                   hmrcfrontend.Routes
+->         /govuk-frontend                      govuk.Routes
+->         /hmrc-frontend                       hmrcfrontend.Routes
 
 GET        /assets/*file                                        controllers.Assets.versioned(path = "/public", file: Asset)
 
@@ -51,3 +51,34 @@ GET        /movie-genres/confirmation/:isSessionUpdate          uk.gov.hmrc.capm
 
 GET        /movie-genres/confirmation/:genre/:isSessionUpdate                    uk.gov.hmrc.capmovie.controllers.MovieGenresController.deleteGenre(genre: String, isSessionUpdate: Boolean)
 
+GET        /update/:id/title                    uk.gov.hmrc.capmovie.controllers.MovieTitleController.getUpdateTitle(id:String)
++nocsrf
+POST       /update/:id/title                    uk.gov.hmrc.capmovie.controllers.MovieTitleController.updateMovieTitle(id:String)
+
+GET        /update/:id/plot                     uk.gov.hmrc.capmovie.controllers.MoviePlotController.getUpdatePlot(id:String)
++nocsrf
+POST       /update/:id/plot                     uk.gov.hmrc.capmovie.controllers.MoviePlotController.updateMoviePlot(id:String)
+
+GET        /update/:id/poster                   uk.gov.hmrc.capmovie.controllers.MoviePosterController.getUpdatePoster(id:String)
++nocsrf
+POST       /update/:id/poster                   uk.gov.hmrc.capmovie.controllers.MoviePosterController.updateMoviePoster(id:String)
+
+GET        /update/:id/age-rating               uk.gov.hmrc.capmovie.controllers.MovieRatingController.getUpdateAgeRating(id:String)
++nocsrf
+POST       /update/:id/age-rating              uk.gov.hmrc.capmovie.controllers.MovieRatingController.updateAgeRating(id:String)
+
+GET        /update/:id/genre                    uk.gov.hmrc.capmovie.controllers.MovieGenresController.getUpdateGenre(id:String)
++nocsrf
+POST       /update/:id/genre                    uk.gov.hmrc.capmovie.controllers.MovieGenresController.updateMovieGenre(id:String)
+
+GET        /update/:id/genre/confirmation       uk.gov.hmrc.capmovie.controllers.MovieGenresController.getUpdateConfirmationPage(id: String)
+
+GET        /update/:id/genre/:genre             uk.gov.hmrc.capmovie.controllers.MovieGenresController.updateDeleteGenre(id: String, genre: String)
+
+GET        /update/:id/cast                     uk.gov.hmrc.capmovie.controllers.MovieCastController.getUpdateCast(id: String)
++nocsrf
+POST       /update/:id/cast                     uk.gov.hmrc.capmovie.controllers.MovieCastController.updateMovieCast(id: String)
+
+GET        /update/:id/cast/confirmation        uk.gov.hmrc.capmovie.controllers.MovieCastController.getUpdateConfirmationPage(id: String)
+
+GET        /update/:id/cast/:cast               uk.gov.hmrc.capmovie.controllers.MovieCastController.updateDeleteCast(id: String, cast: String)

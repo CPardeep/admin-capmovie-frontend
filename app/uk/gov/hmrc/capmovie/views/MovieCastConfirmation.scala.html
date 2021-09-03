@@ -1,9 +1,41 @@
 @import uk.gov.hmrc.capmovie.models.MovieReg
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @this(layout: Layout, govukInput : GovukInput, govukErrorSummary : GovukErrorSummary)
-@(castList: List[String] )(implicit request: Request[_], messages: Messages)
+@(castList: List[String], isUpdate: Boolean, movieId: String)(implicit request: Request[_], messages: Messages)
 @layout(pageTitle = Some("Cast Confirmation Page")) {
 
+@if(isUpdate == true) {
+<div id="movie-container">
+    <h1 class="govuk-heading-l">Check your cast list before continuing</h1>
+
+    <dl id="cast-list" class="govuk-summary-list govuk-!-margin-bottom-9">
+        @for((cast, index) <- castList.zipWithIndex) {
+        <div class="govuk-summary-list__row">
+            <dd class="govuk-summary-list__value movie">
+                @cast
+            </dd>
+            <dd class="govuk-summary-list__actions">
+                <a class="govuk-link" href="http://localhost:9000/capmovie/update/@movieId/cast/@cast">
+                    Remove<span class="govuk-visually-hidden">@cast</span>
+                </a>
+            </dd>
+        </div>
+        }
+    </dl>
+</div>
+
+<br>
+<h2 class="govuk-heading-m">Accept and continue or add another cast member</h2>
+<a id="add-another-cast" href="http://localhost:9000/capmovie/update/@movieId/cast" class="govuk-link">Add another cast
+    member</a>
+<br>
+<br>
+<a id="next-button" class="govuk-button"
+   href="http://localhost:9001/capmovie/movie/@movieId ">
+    Continue
+</a>
+
+} else {
 
 <div id="movie-container">
     <h1 class="govuk-heading-l">Check your cast list before continuing</h1>
@@ -25,11 +57,13 @@
 
 <br>
 <h2 class="govuk-heading-m">Accept and continue or add another cast member</h2>
-<a id="add-another-cast" href="http://localhost:9000/capmovie/movie-cast/" class="govuk-link">Add another cast member</a>
+<a id="add-another-cast" href="http://localhost:9000/capmovie/movie-cast/" class="govuk-link">Add another cast
+    member</a>
 <br>
 <br>
 <a id="next-button" class="govuk-button" href="@uk.gov.hmrc.capmovie.controllers.routes.MovieSummaryController.getSummary(false)">
     Continue
 </a>
+}
 
 }

@@ -18,12 +18,12 @@ package uk.gov.hmrc.capmovie.controllers
 
 import play.api.i18n.Messages.implicitMessagesProviderToMessages
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.capmovie.connectors.UpdateConnector
+import uk.gov.hmrc.capmovie.controllers.predicates.Login
 import uk.gov.hmrc.capmovie.models.MovieRegCast
 import uk.gov.hmrc.capmovie.repo.SessionRepo
+import uk.gov.hmrc.capmovie.views.html.{MovieCast, MovieCastConfirmation}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-import uk.gov.hmrc.capmovie.views.html.MovieCast
-import uk.gov.hmrc.capmovie.views.html.MovieCastConfirmation
-import uk.gov.hmrc.capmovie.controllers.predicates.Login
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,37 +33,41 @@ class MovieCastController @Inject()(repo: SessionRepo,
                                     mcc: MessagesControllerComponents,
                                     castPage: MovieCast,
                                     confirmPage: MovieCastConfirmation,
-                                    login: Login
+                                    login: Login,
+                                    connector: UpdateConnector
                                    )
 
   extends FrontendController(mcc) {
 
-  def getMovieCast: Action[AnyContent] = Action async  { implicit request =>
+  def getMovieCast: Action[AnyContent] = Action async { implicit request =>
     login.check { _ =>
-      Future.successful(Ok(castPage(MovieRegCast.form.fill(MovieRegCast("")))))
+      Future.successful(Ok(castPage(MovieRegCast.form.fill(MovieRegCast("")), isUpdate = false, "")))
     }
   }
 
   def getConfirmationPage: Action[AnyContent] = Action async { implicit request =>
     login.check { _ =>
-    repo.readOne(request.session.get("adminId").getOrElse("")).map { x =>
-     Ok(confirmPage(x.get.cast))
+      repo.readOne(request.session.get("adminId").getOrElse("")).map { x =>
+        Ok(confirmPage(x.get.cast, isUpdate = false, ""))
+      }
     }
-  }}
+  }
 
   def submitMovieCast(): Action[AnyContent] = Action async { implicit request =>
     login.check { id =>
-    MovieRegCast.form.bindFromRequest().fold({
-      formWithErrors => Future(BadRequest(castPage(formWithErrors)))
-    }, { formData =>
-      repo.addCast(id, formData.cast).map {
-        case true =>   Redirect(routes.MovieCastController.getConfirmationPage())
-        case false => Unauthorized("error")
-      }.recover {
-        case _ => InternalServerError
-      }
-    })
-  }}
+      MovieRegCast.form.bindFromRequest().fold({
+        formWithErrors => Future(BadRequest(castPage(formWithErrors, isUpdate = false, "")))
+      }, { formData =>
+        for {
+          same <- repo.readOne(id).map { x => x.get.cast.contains(formData.cast) }
+          added <- repo.addCast(id, formData.cast)
+        } yield (same, added) match {
+          case (true, false) | (false, true) => Redirect(routes.MovieCastController.getConfirmationPage())
+          case _ => InternalServerError
+        }
+      })
+    }
+  }
 
   def deleteCast(cast: String): Action[AnyContent] = Action.async { implicit request =>
     login.check { _ =>
@@ -77,4 +81,48 @@ class MovieCastController @Inject()(repo: SessionRepo,
       }
     }
   }
+
+  def getUpdateCast(id: String): Action[AnyContent] = Action async { implicit request =>
+    login.check { _ =>
+      Future.successful(Ok(castPage(MovieRegCast.form.fill(MovieRegCast("")), isUpdate = true, id)))
+    }
+  }
+
+  def updateMovieCast(id: String): Action[AnyContent] = Action async { implicit request =>
+    login.check { _ =>
+      MovieRegCast.form.bindFromRequest().fold({
+        formWithErrors => Future(BadRequest(castPage(formWithErrors, isUpdate = true, id)))
+      }, { formData =>
+        for {
+          same <- connector.readOne(id).map { x => x.get.cast.contains(formData.cast) }
+          updated <- connector.updateCast(id, formData.cast)
+        } yield (same, updated) match {
+          case (true, false) | (false, true) => Redirect(routes.MovieCastController.getUpdateConfirmationPage(id))
+          case _ => InternalServerError
+        }
+      })
+    }
+  }
+
+  def getUpdateConfirmationPage(id: String): Action[AnyContent] = Action async { implicit request =>
+    login.check { _ =>
+      connector.readOne(id).map { x =>
+        Ok(confirmPage(x.get.cast, isUpdate = true, id))
+      }
+    }
+  }
+
+  def updateDeleteCast(id: String, cast: String): Action[AnyContent] = Action.async { implicit request =>
+    login.check { _ =>
+      for {
+        deleted <- connector.removeCast(id, cast)
+        optMovie <- connector.readOne(id)
+      } yield optMovie match {
+        case Some(movie) => if (movie.cast.nonEmpty) Redirect(routes.MovieCastController.getUpdateConfirmationPage(id))
+        else Redirect(routes.MovieCastController.getUpdateCast(id))
+        case _ => InternalServerError
+      }
+    }
+  }
+
 }

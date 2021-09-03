@@ -17,8 +17,9 @@
 package uk.gov.hmrc.capmovie.controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.capmovie.connectors.UpdateConnector
 import uk.gov.hmrc.capmovie.controllers.predicates.Login
-import uk.gov.hmrc.capmovie.models.{MovieRegRating, MovieRegTitle}
+import uk.gov.hmrc.capmovie.models.MovieRegRating
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.MovieRating
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -30,7 +31,8 @@ import scala.concurrent.Future
 class MovieRatingController @Inject()(repo: SessionRepo,
                                       mcc: MessagesControllerComponents,
                                       ageRatingPage: MovieRating,
-                                      login: Login)
+                                      login: Login,
+                                      connector: UpdateConnector)
 
   extends FrontendController(mcc) {
 
@@ -38,7 +40,7 @@ class MovieRatingController @Inject()(repo: SessionRepo,
     login.check { id =>
       repo.readOne(id).map { x =>
         val form = MovieRegRating.form.fill(MovieRegRating(x.get.rated.getOrElse("")))
-        Ok(ageRatingPage(form, isSessionUpdate))
+        Ok(ageRatingPage(form, isSessionUpdate, isUpdate = false, ""))
       }
     }
   }
@@ -47,10 +49,10 @@ class MovieRatingController @Inject()(repo: SessionRepo,
     login.check {
       id =>
         MovieRegRating.form.bindFromRequest().fold({
-          formWithErrors => Future(BadRequest(ageRatingPage(formWithErrors, false)))
+          formWithErrors => Future(BadRequest(ageRatingPage(formWithErrors, isSessionUpdate = false, isUpdate = false, "")))
         }, { formData =>
           for {
-            same  <- repo.readOne(id).map { x => x.get.rated.contains(formData.rating) }
+            same <- repo.readOne(id).map { x => x.get.rated.contains(formData.rating) }
             added <- repo.addAgeRating(id, formData.rating)
 
           } yield (same, added) match {
@@ -60,6 +62,32 @@ class MovieRatingController @Inject()(repo: SessionRepo,
           }
         }
         )
+    }
+  }
+
+
+  def getUpdateAgeRating(id: String): Action[AnyContent] = Action async { implicit request =>
+    login.check { _ =>
+      connector.readOne(id).flatMap { x =>
+        val form = MovieRegRating.form.fill(MovieRegRating(x.get.rated))
+        Future.successful(Ok(ageRatingPage(form, isSessionUpdate = false, isUpdate = true, id)))
+      }
+    }
+  }
+
+  def updateAgeRating(id: String): Action[AnyContent] = Action async { implicit request =>
+    login.check { _ =>
+      MovieRegRating.form.bindFromRequest().fold({
+        formWithErrors => Future(BadRequest(ageRatingPage(formWithErrors, isSessionUpdate = false, isUpdate = true, id)))
+      }, { formData =>
+        for {
+          same <- connector.readOne(id).map { x => x.get.rated.contains(formData.rating) }
+          updated <- connector.updateRating(id, formData.rating)
+        } yield (same, updated) match {
+          case (true, false) | (false, true) => Redirect(routes.MoviePlotController.updateMoviePlot(id))
+          case _ => InternalServerError
+        }
+      })
     }
   }
 

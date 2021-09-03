@@ -25,9 +25,10 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, SEE_OTHER}
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Helpers}
+import uk.gov.hmrc.capmovie.connectors.UpdateConnector
 import uk.gov.hmrc.capmovie.controllers.MoviePlotController
 import uk.gov.hmrc.capmovie.controllers.predicates.Login
-import uk.gov.hmrc.capmovie.models.MovieReg
+import uk.gov.hmrc.capmovie.models.{Movie, MovieReg}
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.MoviePlot
 
@@ -37,9 +38,11 @@ import scala.concurrent.Future
 class MoviePlotControllerISpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
 
   val repo: SessionRepo = mock[SessionRepo]
+  val connector: UpdateConnector = mock[UpdateConnector]
   val plotPage: MoviePlot = app.injector.instanceOf[MoviePlot]
   val login: Login = app.injector.instanceOf[Login]
-  val controller = new MoviePlotController(repo, Helpers.stubMessagesControllerComponents(), plotPage, login)
+  val controller = new MoviePlotController(repo, Helpers.stubMessagesControllerComponents(), plotPage, login, connector)
+
   val movieReg: MovieReg = MovieReg(
     adminId = "TESTID",
     plot = Some("Test plot"),
@@ -52,6 +55,20 @@ class MoviePlotControllerISpec extends AnyWordSpec with Matchers with GuiceOneAp
       "TestPerson"),
     poster = Some("testURL"),
     title = Some("testTitle"))
+
+  val movie: Movie = Movie(
+    id = "TESTMOV",
+    plot = "Test plot",
+    genres = List(
+      "testGenre1",
+      "testGenre2"),
+    rated = "testRating",
+    cast = List(
+      "testPerson",
+      "TestPerson"),
+    poster = "testURL",
+    title = "testTitle")
+
 
   "getMoviePlot" should {
     "load the page when called" in {
@@ -74,6 +91,7 @@ class MoviePlotControllerISpec extends AnyWordSpec with Matchers with GuiceOneAp
         status(result) shouldBe SEE_OTHER
       }
     }
+
     "returns redirect" when {
       "when form value is the same" in {
         when(repo.readOne(any())).thenReturn(Future(Some(movieReg)))
@@ -103,4 +121,53 @@ class MoviePlotControllerISpec extends AnyWordSpec with Matchers with GuiceOneAp
       status(result) shouldBe INTERNAL_SERVER_ERROR
     }
   }
+
+  "getUpdatePlot" should {
+    "load the page when called" in {
+      when(connector.readOne(any()))
+        .thenReturn(Future(Some(movie)))
+      val result = controller.getUpdatePlot("TESTMOV").apply(FakeRequest("GET", "/")
+        .withSession("adminId" -> "TESTID"))
+      status(result) shouldBe OK
+    }
+  }
+
+  "POST updateMoviePlot" should {
+    "the form is submitted with errors" in {
+      val result = controller.updateMoviePlot("TESTMOV").apply(FakeRequest("POST", "/")
+        .withSession("adminId" -> "TESTID")
+        .withFormUrlEncodedBody("plot" -> ""))
+      status(result) shouldBe BAD_REQUEST
+    }
+    "the form is submitted" in {
+      when(connector.readOne(any()))
+        .thenReturn(Future(Some(movie)))
+      when(connector.updatePlot(any(), any())).thenReturn(Future(true))
+      val result = controller.updateMoviePlot("TESTMOV").apply(FakeRequest("POST", "/")
+        .withSession("adminId" -> "TESTID")
+        .withFormUrlEncodedBody("plot" -> "UpdatedPlot"))
+      status(result) shouldBe SEE_OTHER
+    }
+    "returns redirect" when{
+      "when form value is the same" in {
+        when(connector.readOne(any()))
+          .thenReturn(Future(Some(movie)))
+        when(connector.updatePlot(any(), any())).thenReturn(Future(false))
+        val result = controller.updateMoviePlot("TESTMOV").apply(FakeRequest("POST", "/")
+          .withSession("adminId" -> "TESTID")
+          .withFormUrlEncodedBody("plot" -> "Test plot"))
+        status(result) shouldBe SEE_OTHER
+      }
+    }
+    "returns internalServerError" in {
+      when(connector.readOne(any()))
+        .thenReturn(Future(Some(movie)))
+      when(connector.updatePlot(any(), any())).thenReturn(Future(false))
+      val result = controller.updateMoviePlot("TESTMOV").apply(FakeRequest("POST", "/")
+        .withSession("adminId" -> "TESTID")
+        .withFormUrlEncodedBody("plot" -> "UpdatedPlot"))
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+    }
+  }
+
 }

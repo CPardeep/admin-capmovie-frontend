@@ -1,8 +1,9 @@
 @import uk.gov.hmrc.capmovie.models.MovieRegCast
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @this(layout: Layout, govukInput : GovukInput, govukErrorSummary : GovukErrorSummary)
-@(form: Form[MovieRegCast])(implicit request: Request[_], messages: Messages)
+@(form: Form[MovieRegCast], isUpdate: Boolean, movieId: String)(implicit request: Request[_], messages: Messages)
 @layout(pageTitle = Some("Cast Page")) {
+
 @if(form.errors.nonEmpty) {
 @defining(form.errors.map { error =>
 ErrorLink(href = Some(s"#${error.key}"), content = Text(messages(error.message, error.args:_*)))
@@ -12,7 +13,8 @@ title = Text(messages("There is a problem"))
 ))
 }
 }
-@helper.form(uk.gov.hmrc.capmovie.controllers.routes.MovieCastController.submitMovieCast()) {
+
+@if(isUpdate == true) { @helper.form(uk.gov.hmrc.capmovie.controllers.routes.MovieCastController.updateMovieCast(movieId)) {
 <div class="govuk-form-group">
     @govukInput(Input(
     id = "cast",
@@ -31,5 +33,26 @@ title = Text(messages("There is a problem"))
         Continue
     </button>
 </div>
+}
+} else { @helper.form(uk.gov.hmrc.capmovie.controllers.routes.MovieCastController.submitMovieCast()) {
+<div class="govuk-form-group">
+    @govukInput(Input(
+    id = "cast",
+    name = "cast",
+    hint = Some(Hint(content = Text(""))),
+    errorMessage = if(form.errors("cast").nonEmpty) { Some(ErrorMessage(
+    content = Text("")))} else {None},
+    label = Label(
+    isPageHeading = true,
+    classes = "govuk-label--l",
+    content = Text("Who are the cast in the movie?")
+    )
+    ))
+    <br>
+    <button id="next-button" class="govuk-button" data-module="govuk-button">
+        Continue
+    </button>
+</div>
+}
 }
 }

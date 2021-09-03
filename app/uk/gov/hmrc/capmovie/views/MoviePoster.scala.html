@@ -1,8 +1,8 @@
 @import uk.gov.hmrc.capmovie.models.MovieRegPoster
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @this(layout: Layout, govukInput : GovukInput, govukErrorSummary : GovukErrorSummary)
-@(form: Form[MovieRegPoster], isSessionUpdate: Boolean)(implicit request: Request[_], messages: Messages)
-@layout(pageTitle = Some("Poster Page"), isLoggedIn = true) {
+@(form: Form[MovieRegPoster], isSessionUpdate: Boolean, isUpdate: Boolean, movieId: String)(implicit request: Request[_], messages: Messages)
+@layout(pageTitle = Some("Poster Page")) {
 
 @if(form.errors.nonEmpty) {
 @defining(form.errors.map { error =>
@@ -13,7 +13,8 @@ title = Text(messages("There is a problem"))
 ))
 }
 }
-@helper.form(uk.gov.hmrc.capmovie.controllers.routes.MoviePosterController.submitMoviePoster(isSessionUpdate)) {
+
+@if(isUpdate == true) {@helper.form(uk.gov.hmrc.capmovie.controllers.routes.MoviePosterController.updateMoviePoster(movieId)) {
 <div class="govuk-form-group">
     @govukInput(Input(
     id = "poster",
@@ -33,5 +34,27 @@ title = Text(messages("There is a problem"))
         Continue
     </button>
 </div>
+}
+} else { @helper.form(uk.gov.hmrc.capmovie.controllers.routes.MoviePosterController.submitMoviePoster(isSessionUpdate)) {
+<div class="govuk-form-group">
+    @govukInput(Input(
+    id = "poster",
+    name = "poster",
+    value = Some(form.data("poster")),
+    hint = Some(Hint(content = Text(""))),
+    errorMessage = if(form.errors("poster").nonEmpty) { Some(ErrorMessage(
+    content = Text("What is the poster of the movie?")))} else {None},
+    label = Label(
+    isPageHeading = true,
+    classes = "govuk-label--l",
+    content = Text("poster")
+    )
+    ))
+    <br>
+    <button id="next-button" class="govuk-button" data-module="govuk-button">
+        Continue
+    </button>
+</div>
+}
 }
 }
