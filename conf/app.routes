@@ -3,47 +3,51 @@
 ->         /govuk-frontend                  govuk.Routes
 ->         /hmrc-frontend                   hmrcfrontend.Routes
 
-GET        /assets/*file                    controllers.Assets.versioned(path = "/public", file: Asset)
+GET        /assets/*file                       controllers.Assets.versioned(path = "/public", file: Asset)
 
-GET        /logout                          uk.gov.hmrc.capmovie.controllers.LoginController.logout()
+GET        /logout                             uk.gov.hmrc.capmovie.controllers.LoginController.logout()
 
-GET        /movie-title                     uk.gov.hmrc.capmovie.controllers.MovieTitleController.getMovieTitle()
+GET        /movie-title                        uk.gov.hmrc.capmovie.controllers.MovieTitleController.getMovieTitle()
 +nocsrf
-POST       /movie-title                     uk.gov.hmrc.capmovie.controllers.MovieTitleController.submitMovieTitle()
+POST       /movie-title                        uk.gov.hmrc.capmovie.controllers.MovieTitleController.submitMovieTitle()
 
-GET        /movie-cast                      uk.gov.hmrc.capmovie.controllers.MovieCastController.getMovieCast()
-GET        /movie-cast/confirmation         uk.gov.hmrc.capmovie.controllers.MovieCastController.getConfirmationPage()
+GET        /movie-cast                         uk.gov.hmrc.capmovie.controllers.MovieCastController.getMovieCast()
+
+GET        /movie-cast/confirmation            uk.gov.hmrc.capmovie.controllers.MovieCastController.getConfirmationPage()
+
+GET        /movie-cast/confirmation/:cast      uk.gov.hmrc.capmovie.controllers.MovieCastController.deleteCast(cast: String)
+
 +nocsrf
-POST       /movie-cast                      uk.gov.hmrc.capmovie.controllers.MovieCastController.submitMovieCast()
+POST       /movie-cast                         uk.gov.hmrc.capmovie.controllers.MovieCastController.submitMovieCast()
 
-GET        /movie-poster                    uk.gov.hmrc.capmovie.controllers.MoviePosterController.getMoviePoster()
+GET        /movie-poster                       uk.gov.hmrc.capmovie.controllers.MoviePosterController.getMoviePoster()
 +nocsrf
-POST       /movie-poster                    uk.gov.hmrc.capmovie.controllers.MoviePosterController.submitMoviePoster()
+POST       /movie-poster                       uk.gov.hmrc.capmovie.controllers.MoviePosterController.submitMoviePoster()
 
 
-GET        /movie-plot                      uk.gov.hmrc.capmovie.controllers.MoviePlotController.getMoviePlot()
+GET        /movie-plot                         uk.gov.hmrc.capmovie.controllers.MoviePlotController.getMoviePlot()
 +nocsrf
-POST       /movie-plot                      uk.gov.hmrc.capmovie.controllers.MoviePlotController.submitMoviePlot()
+POST       /movie-plot                         uk.gov.hmrc.capmovie.controllers.MoviePlotController.submitMoviePlot()
 
-GET        /age-rating                      uk.gov.hmrc.capmovie.controllers.MovieRatingController.getAgeRating()
+GET        /age-rating                         uk.gov.hmrc.capmovie.controllers.MovieRatingController.getAgeRating()
 +nocsrf
-POST       /age-rating                      uk.gov.hmrc.capmovie.controllers.MovieRatingController.submitAgeRating()
+POST       /age-rating                         uk.gov.hmrc.capmovie.controllers.MovieRatingController.submitAgeRating()
 
-GET        /summary                         uk.gov.hmrc.capmovie.controllers.MovieSummaryController.getSummary()
+GET        /summary                            uk.gov.hmrc.capmovie.controllers.MovieSummaryController.getSummary()
 +nocsrf
-GET       /submit                         uk.gov.hmrc.capmovie.controllers.MovieSummaryController.submitSummary()
+GET       /submit                              uk.gov.hmrc.capmovie.controllers.MovieSummaryController.submitSummary()
 
-GET        /confirmation                    uk.gov.hmrc.capmovie.controllers.MovieSummaryController.confirmation()
+GET        /confirmation                       uk.gov.hmrc.capmovie.controllers.MovieSummaryController.confirmation()
 
-GET        /login                           uk.gov.hmrc.capmovie.controllers.LoginController.getLoginPage
+GET        /login                              uk.gov.hmrc.capmovie.controllers.LoginController.getLoginPage
 +nocsrf
-POST       /login                           uk.gov.hmrc.capmovie.controllers.LoginController.submitLogin
+POST       /login                              uk.gov.hmrc.capmovie.controllers.LoginController.submitLogin
 
-GET        /movie-genres                    uk.gov.hmrc.capmovie.controllers.MovieGenresController.getMovieGenres()
+GET        /movie-genres                       uk.gov.hmrc.capmovie.controllers.MovieGenresController.getMovieGenres()
 +nocsrf
-POST       /movie-genres                    uk.gov.hmrc.capmovie.controllers.MovieGenresController.submitMovieGenres()
+POST       /movie-genres                       uk.gov.hmrc.capmovie.controllers.MovieGenresController.submitMovieGenres()
 
-GET        /movie-genres/confirmation       uk.gov.hmrc.capmovie.controllers.MovieGenresController.getConfirmationPage()
+GET        /movie-genres/confirmation          uk.gov.hmrc.capmovie.controllers.MovieGenresController.getConfirmationPage()
 
 GET        /movie-genres/confirmation/:genre    uk.gov.hmrc.capmovie.controllers.MovieGenresController.deleteGenre(genre: String)
 

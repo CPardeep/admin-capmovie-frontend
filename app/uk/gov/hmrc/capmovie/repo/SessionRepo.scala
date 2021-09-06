@@ -97,5 +97,12 @@ class SessionRepo @Inject()(mongoComponent: MongoComponent) extends PlayMongoRep
 
   def readOne(id: String): Future[Option[MovieReg]] = collection.find(equal("adminId", id)).headOption
 
+  def removeCast(id: String, cast: String): Future[Boolean] = {
+    collection.updateOne(
+      Filters.equal("adminId", id),
+      pull("cast", cast)
+    ).toFuture().map(result => result.getModifiedCount == 1 && result.wasAcknowledged())
+  }
+
 
 }

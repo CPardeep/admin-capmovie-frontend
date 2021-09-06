@@ -64,4 +64,17 @@ class MovieCastController @Inject()(repo: SessionRepo,
       }
     })
   }}
+
+  def deleteCast(cast: String): Action[AnyContent] = Action.async { implicit request =>
+    login.check { _ =>
+      for {
+        deleted <- repo.removeCast(request.session.get("adminId").getOrElse(""), cast)
+        optMovie <- repo.readOne(request.session.get("adminId").getOrElse(""))
+      } yield optMovie match {
+        case Some(movie) => if (movie.cast.nonEmpty) Redirect(routes.MovieCastController.getConfirmationPage())
+        else Redirect(routes.MovieCastController.getMovieCast())
+        case _ => InternalServerError
+      }
+    }
+  }
 }

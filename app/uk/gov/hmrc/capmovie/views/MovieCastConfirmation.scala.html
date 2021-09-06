@@ -1,23 +1,35 @@
-@import uk.gov.hmrc.capmovie.models.{MovieRegCast, MovieReg}
+@import uk.gov.hmrc.capmovie.models.MovieReg
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @this(layout: Layout, govukInput : GovukInput, govukErrorSummary : GovukErrorSummary)
-@(movieList: List[String] )(implicit request: Request[_], messages: Messages)
+@(castList: List[String] )(implicit request: Request[_], messages: Messages)
 @layout(pageTitle = Some("Cast Confirmation Page")) {
+
+
 <div id="movie-container">
-    @for(movie <- movieList){
-    <div class="movie-card">
-        <p> @movie</p>
-    </div>
-    }
+    <h1 class="govuk-heading-l">Check your cast list before continuing</h1>
+    <dl id="cast-list" class="govuk-summary-list govuk-!-margin-bottom-9">
+        @for((cast, index) <- castList.zipWithIndex) {
+        <div class="govuk-summary-list__row">
+            <dd class="govuk-summary-list__value movie">
+                @cast
+            </dd>
+            <dd class="govuk-summary-list__actions">
+                <a class="govuk-link" href="http://localhost:9000/capmovie/movie-cast/confirmation/@cast">
+                    Remove<span class="govuk-visually-hidden">@cast</span>
+                </a>
+            </dd>
+        </div>
+        }
+    </dl>
 </div>
+
 <br>
-<a class="govuk-link cancel" data-module="govuk-button" href="@uk.gov.hmrc.capmovie.controllers.routes.MovieCastController.getMovieCast()">
-    Add another cast member
-</a>
+<h2 class="govuk-heading-m">Accept and continue or add another cast member</h2>
+<a id="add-another-cast" href="http://localhost:9000/capmovie/movie-cast/" class="govuk-link">Add another cast member</a>
 <br>
-<a class="govuk-button" href="@uk.gov.hmrc.capmovie.controllers.routes.MovieSummaryController.getSummary()">
+<br>
+<a id="next-button" class="govuk-button" href="@uk.gov.hmrc.capmovie.controllers.routes.MovieSummaryController.getSummary()">
     Continue
 </a>
-
 
 }

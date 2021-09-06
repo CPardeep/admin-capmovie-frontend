@@ -138,6 +138,23 @@ class SessionRepoISpec extends AnyWordSpec with Matchers with ScalaFutures with 
       await(repository.addCast("falseId", "Actor")) shouldBe false
     }
   }
+  "removeCast" should {
+    "return true when cast is successfully removed" in {
+      await(repository.create(MovieReg("testId")))
+      await(repository.addCast("testId", "Actor"))
+      await(repository.removeCast("testId", "Actor")) shouldBe true
+    }
+    "return false when a wrong adminId is submitted" in {
+      await(repository.create(MovieReg("testId")))
+      await(repository.removeCast("testId", "Actor"))
+      await(repository.removeCast("falseId", "Actor")) shouldBe false
+    }
+    "return false when invalid cast is submitted" in {
+      await(repository.create(MovieReg("testId")))
+      await(repository.removeCast("testId", "Actor"))
+      await(repository.removeCast("testId", "falseActor")) shouldBe false
+    }
+  }
   "readOne" should {
     "return 1 when valid adminId is submitted" in {
       await(repository.create(MovieReg("testId")))
