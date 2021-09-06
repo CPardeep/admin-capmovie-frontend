@@ -45,3 +45,5 @@ POST       /movie-genres                    uk.gov.hmrc.capmovie.controllers.Mov
 
 GET        /movie-genres/confirmation       uk.gov.hmrc.capmovie.controllers.MovieGenresController.getConfirmationPage()
 
+GET        /movie-genres/confirmation/:genre    uk.gov.hmrc.capmovie.controllers.MovieGenresController.deleteGenre(genre: String)
+
