@@ -111,20 +111,20 @@ class SessionRepoISpec extends AnyWordSpec with Matchers with ScalaFutures with 
   }
 
   "removeGenre" should {
-    await(repository.create(MovieReg("testId")))
     "return true when genre is successfully removed" in {
-
+      await(repository.create(MovieReg("testId")))
       await(repository.addGenres("testId", "testGenre"))
-      await(repository.removeGenre("testId", "testGenre"))
+      await(repository.removeGenre("testId", "testGenre")) shouldBe true
     }
     "return false when wrong adminId is submitted" in {
-
+      await(repository.create(MovieReg("testId")))
       await(repository.removeGenre("testId", "testGenre"))
-      await(repository.removeGenre("falseId", "testGenre"))
+      await(repository.removeGenre("falseId", "testGenre")) shouldBe false
     }
     "return false when invalid genre is submitted" in {
+      await(repository.create(MovieReg("testId")))
       await(repository.removeGenre("testId", "testGenre"))
-      await(repository.removeGenre("testId", "falseGenre"))
+      await(repository.removeGenre("testId", "falseGenre")) shouldBe false
     }
 
   }
