@@ -11,11 +11,11 @@
     <dl id="genres-list" class="govuk-summary-list govuk-!-margin-bottom-9">
         @for((genre,index) <- genresList.zipWithIndex) {
         <div class="govuk-summary-list__row">
-            <dd id=genre[@index] class="govuk-summary-list__value genre">
+            <dd class="govuk-summary-list__value genre">
                 @genre
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a class="govuk-link" href="http://localhost:9000/capmovie/movie-genres/confirmation/@genre">
+                <a id=genre[@index] class="govuk-link" href="http://localhost:9000/capmovie/movie-genres/confirmation/@genre">
                     Remove<span class="govuk-visually-hidden">@genre</span>
                 </a>
             </dd>
