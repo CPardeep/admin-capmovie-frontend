@@ -2,97 +2,104 @@
 @import helper._
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @this(layout: Layout, govukErrorSummary : GovukErrorSummary)
-@(result:MovieReg)(implicit request: Request[_], messages: Messages)
+@(result:MovieReg, isSessionUpdate: Boolean)(implicit request: Request[_], messages: Messages)
 @layout(pageTitle = Some("Summary")) {
 
-<a href="@uk.gov.hmrc.capmovie.controllers.routes.MovieRatingController.getAgeRating" class="govuk-back-link">Back</a>
-<h1 class="govuk-heading-xl">Summary of details</h1>
-
+<h1 class="govuk-heading-xl">Please check the details you have entered before you submit the movie</h1>
 <div id="with-hint-hint" class="govuk-hint">
-    Below are the details you entered. If these are correct press submit to continue or back to alter details.
-
-
+    Below are the details you entered. If these are correct press submit to continue or change to alter details.
 </div>
+<h2 class="govuk-heading-m">Movie details</h2>
     <dl class="govuk-summary-list">
         <div class="govuk-summary-list__row">
             <dt class="govuk-summary-list__key">
-                Title:
+                Title
             </dt>
             <dd id="title-value" class="govuk-summary-list__value">
                 @result.title
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a class="govuk-link" href="#">
+                <a id="change-title" class="govuk-link" href="@uk.gov.hmrc.capmovie.controllers.routes.MovieTitleController.getMovieTitle(isSessionUpdate = true)">
                     Change<span class="govuk-visually-hidden"> title</span>
                 </a>
             </dd>
         </div>
         <div class="govuk-summary-list__row">
             <dt class="govuk-summary-list__key">
-                Genres:
+                Genres
             </dt>
             <dd id="genres-value" class="govuk-summary-list__value">
-                @result.genres
+                @for(genres <- result.genres){
+                @genres
+                <br>
+                }
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a class="govuk-link" href="#">
+                <a id="change-genre" class="govuk-link" href="@uk.gov.hmrc.capmovie.controllers.routes.MovieGenresController.getConfirmationPage(true)">
                     Change<span class="govuk-visually-hidden"> genres</span>
                 </a>
             </dd>
+
         </div>
         <div class="govuk-summary-list__row">
             <dt class="govuk-summary-list__key">
-                Age rating:
+                Age rating
             </dt>
             <dd id="age-rating-value" class="govuk-summary-list__value">
                 @result.rated
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a class="govuk-link" href="#">
+                <a id="change-age-rating" class="govuk-link" href="@uk.gov.hmrc.capmovie.controllers.routes.MovieRatingController.getAgeRating(true)">
                     Change<span class="govuk-visually-hidden"> age rating</span>
                 </a>
             </dd>
         </div>
         <div class="govuk-summary-list__row">
             <dt class="govuk-summary-list__key">
-                Plot:
+                Plot
             </dt>
             <dd id="plot-value" class="govuk-summary-list__value">
                 @result.plot
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a class="govuk-link" href="#">
+                <a id="change-plot" class="govuk-link" href="@uk.gov.hmrc.capmovie.controllers.routes.MoviePlotController.getMoviePlot(true)">
                     Change<span class="govuk-visually-hidden"> plot</span>
                 </a>
             </dd>
         </div>
         <div class="govuk-summary-list__row">
             <dt class="govuk-summary-list__key">
-                Poster:
+                Poster
             </dt>
             <dd id="poster-value" class="govuk-summary-list__value">
                 @result.poster
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a class="govuk-link" href="#">
+                <a id="change-poster" class="govuk-link" href="@uk.gov.hmrc.capmovie.controllers.routes.MoviePosterController.getMoviePoster(true)">
                     Change<span class="govuk-visually-hidden"> poster</span>
                 </a>
             </dd>
         </div>
         <div class="govuk-summary-list__row">
             <dt class="govuk-summary-list__key">
-                Cast:
+                Cast
             </dt>
             <dd id="cast-value" class="govuk-summary-list__value">
-                @result.cast
+                @for(cast <- result.cast){
+                @cast
+                <br>
+                }
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a class="govuk-link" href="#">
+                <a id="change-cast" class="govuk-link" href="@uk.gov.hmrc.capmovie.controllers.routes.MovieCastController.getConfirmationPage()">
                     Change<span class="govuk-visually-hidden"> cast</span>
                 </a>
             </dd>
         </div>
     </dl>
+<h2 class="govuk-heading-m">Now please submit the details you have entered</h2>
+<p class="govuk-body">Once you have submitted your details, you will be able to see the movie from the Homepage</p>
+
 <form action="@uk.gov.hmrc.capmovie.controllers.routes.MovieSummaryController.submitSummary()">
     <button id="next-button" class="govuk-button" data-module="govuk-button">Submit</button>
 </form>

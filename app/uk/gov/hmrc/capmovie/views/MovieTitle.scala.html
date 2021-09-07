@@ -1,7 +1,8 @@
 @import uk.gov.hmrc.capmovie.models.MovieRegTitle
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @this(layout: Layout, govukInput : GovukInput, govukErrorSummary : GovukErrorSummary)
-@(form: Form[MovieRegTitle])(implicit request: Request[_], messages: Messages)
+@(form: Form[MovieRegTitle], isSessionUpdate: Boolean)(implicit request: Request[_], messages: Messages)
+
 @layout(pageTitle = Some("Title Page"), isLoggedIn = true) {
 
 @if(form.errors.nonEmpty) {
@@ -13,7 +14,7 @@ title = Text(messages("There is a problem"))
 ))
 }
 }
-@helper.form(uk.gov.hmrc.capmovie.controllers.routes.MovieTitleController.submitMovieTitle()) {
+@helper.form(uk.gov.hmrc.capmovie.controllers.routes.MovieTitleController.submitMovieTitle(isSessionUpdate)) {
 <div class="govuk-form-group">
     @if(form.errors("title").nonEmpty) {
     @govukInput(Input(
@@ -32,6 +33,7 @@ title = Text(messages("There is a problem"))
     @govukInput(Input(
     id = "title",
     name = "title",
+    value = Some(form.data("title")),
     hint = Some(Hint(content = Text(""))),
     label = Label(
     isPageHeading = true,

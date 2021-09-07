@@ -22,11 +22,12 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, SEE_OTHER, UNAUTHORIZED}
+import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, SEE_OTHER}
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.capmovie.controllers.MovieRatingController
 import uk.gov.hmrc.capmovie.controllers.predicates.Login
+import uk.gov.hmrc.capmovie.models.MovieReg
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.MovieRating
 
@@ -39,10 +40,25 @@ class MovieRatingControllerISpec extends AnyWordSpec with Matchers with GuiceOne
   val ageRatingPage: MovieRating = app.injector.instanceOf[MovieRating]
   val login: Login = app.injector.instanceOf[Login]
   val controller = new MovieRatingController(repo, Helpers.stubMessagesControllerComponents(), ageRatingPage, login)
+  val movieReg: MovieReg = MovieReg(
+    adminId = "TESTID",
+    plot = Some("Test plot"),
+    genres = List(
+      "testGenre1",
+      "testGenre2"),
+    rated = Some("testRating"),
+    cast = List(
+      "testPerson",
+      "TestPerson"),
+    poster = Some("testURL"),
+    title = Some("testTitle"))
 
   "getMovieAgeRating" should {
     "load the page when called" in {
-      val result = controller.getAgeRating(FakeRequest("GET", "/")
+
+      when(repo.readOne(any()))
+        .thenReturn(Future(Some(movieReg)))
+      val result = controller.getAgeRating(isSessionUpdate = false)(FakeRequest("GET", "/")
         .withSession("adminId" -> "TESTID"))
       status(result) shouldBe OK
     }
@@ -50,34 +66,41 @@ class MovieRatingControllerISpec extends AnyWordSpec with Matchers with GuiceOne
   "submitMovieAgeRating" should {
     "return a form value" when {
       "the form is submitted" in {
+        when(repo.readOne(any())).thenReturn(Future(Some(movieReg)))
         when(repo.addAgeRating(any(), any())).thenReturn(Future(true))
-        val result = controller.submitAgeRating().apply(FakeRequest("POST", "/")
+        val result = controller.submitAgeRating(isSessionUpdate = false).apply(FakeRequest("POST", "/")
+          .withSession("adminId" -> "TESTID")
+          .withFormUrlEncodedBody("rated" -> "testRating1"))
+        status(result) shouldBe SEE_OTHER
+      }
+    }
+    "returns redirect" when {
+      "when form value is the same" in {
+        when(repo.readOne(any())).thenReturn(Future(Some(movieReg)))
+        when(repo.addAgeRating(any(), any())).thenReturn(Future(false))
+        val result = controller.submitAgeRating(isSessionUpdate = true).apply(FakeRequest("POST", "/")
           .withSession("adminId" -> "TESTID")
           .withFormUrlEncodedBody("rated" -> "testRating"))
         status(result) shouldBe SEE_OTHER
       }
+
     }
-  }
-  "return a bad request" when {
-    "the form is submitted" in {
-      val result = controller.submitAgeRating().apply(FakeRequest("POST", "/")
+    "return a bad request" when {
+      "the form is submitted" in {
+        val result = controller.submitAgeRating(isSessionUpdate = false).apply(FakeRequest("POST", "/")
+          .withSession("adminId" -> "TESTID")
+          .withFormUrlEncodedBody("rated" -> ""))
+        status(result) shouldBe BAD_REQUEST
+      }
+    }
+
+    "return InternalServerError" in {
+      when(repo.readOne(any())).thenReturn(Future(Some(movieReg)))
+      when(repo.addAgeRating(any(), any())).thenReturn(Future(false))
+      val result = controller.submitAgeRating(isSessionUpdate = false).apply(FakeRequest("POST", "/")
         .withSession("adminId" -> "TESTID")
-        .withFormUrlEncodedBody("rated" -> ""))
-      status(result) shouldBe BAD_REQUEST
+        .withFormUrlEncodedBody("rated" -> "testRating1"))
+      status(result) shouldBe INTERNAL_SERVER_ERROR
     }
-  }
-  "return Unauthorised" in {
-    when(repo.addAgeRating(any(), any())).thenReturn(Future(false))
-    val result = controller.submitAgeRating().apply(FakeRequest("POST", "/")
-      .withSession("adminId" -> "TESTID")
-      .withFormUrlEncodedBody("rated" -> "testRating"))
-    status(result) shouldBe UNAUTHORIZED
-  }
-  "return InternalServerError" in {
-    when(repo.addAgeRating(any(), any())).thenReturn(Future.failed(new RuntimeException))
-    val result = controller.submitAgeRating().apply(FakeRequest("POST", "/")
-      .withSession("adminId" -> "TESTID")
-      .withFormUrlEncodedBody("rated" -> "testRating"))
-    status(result) shouldBe INTERNAL_SERVER_ERROR
   }
 }

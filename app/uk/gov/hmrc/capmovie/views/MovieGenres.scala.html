@@ -1,7 +1,7 @@
 @import uk.gov.hmrc.capmovie.models.MovieRegGenres
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @this(layout: Layout, govukInput : GovukInput, govukErrorSummary : GovukErrorSummary)
-@(form: Form[MovieRegGenres])(implicit request: Request[_], messages: Messages)
+@(form: Form[MovieRegGenres], isSessionUpdate: Boolean)(implicit request: Request[_], messages: Messages)
 @layout(pageTitle = Some("Genres Page")) {
 @if(form.errors.nonEmpty) {
 @defining(form.errors.map { error =>
@@ -12,7 +12,7 @@ title = Text(messages("There is a problem"))
 ))
 }
 }
-@helper.form(uk.gov.hmrc.capmovie.controllers.routes.MovieGenresController.submitMovieGenres()) {
+@helper.form(uk.gov.hmrc.capmovie.controllers.routes.MovieGenresController.submitMovieGenres(isSessionUpdate)) {
 <div class="govuk-form-group">
 
     @govukInput(Input(

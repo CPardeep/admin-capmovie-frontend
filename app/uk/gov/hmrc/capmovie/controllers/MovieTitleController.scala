@@ -34,26 +34,33 @@ class MovieTitleController @Inject()(repo: SessionRepo,
                                     )
   extends FrontendController(mcc) {
 
-  def getMovieTitle: Action[AnyContent] = Action async { implicit request =>
+  def getMovieTitle(isSessionUpdate: Boolean): Action[AnyContent] = Action async { implicit request =>
     login.check { id =>
       repo.create(MovieReg(adminId = id))
-      Future.successful(Ok(titlePage(MovieRegTitle.form.fill(MovieRegTitle("")))))
+      repo.readOne(id).map { x =>
+        val form = MovieRegTitle.form.fill(MovieRegTitle(x.get.title.getOrElse("")))
+        Ok(titlePage(form, isSessionUpdate))
+      }
     }
   }
 
-  def submitMovieTitle(): Action[AnyContent] = Action async { implicit request =>
+  def submitMovieTitle(isSessionUpdate: Boolean): Action[AnyContent] = Action async { implicit request =>
     login.check {
       id =>
         MovieRegTitle.form.bindFromRequest().fold({
-          formWithErrors => Future(BadRequest(titlePage(formWithErrors)))
+          formWithErrors => Future(BadRequest(titlePage(formWithErrors, false)))
         }, { formData =>
-          repo.addTitle(id, formData.title).map {
-            case true => Redirect(routes.MovieGenresController.getMovieGenres())
-            case false => Unauthorized("error")
-          }.recover {
+          for {
+            same  <- repo.readOne(id).map { x => x.get.title.contains(formData.title) }
+            added <- repo.addTitle(id, formData.title)
+
+          } yield (same, added) match {
+            case (true, false) => Redirect(routes.MovieSummaryController.getSummary(isSessionUpdate = true))
+            case (false, true) => if (isSessionUpdate) Redirect(routes.MovieSummaryController.getSummary(isSessionUpdate = true)) else Redirect(routes.MovieGenresController.getMovieGenres(false))
             case _ => InternalServerError
           }
-        })
+        }
+        )
     }
   }
 }

@@ -18,10 +18,11 @@ package uk.gov.hmrc.capmovie.controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.capmovie.controllers.predicates.Login
-import uk.gov.hmrc.capmovie.models.MovieRegPlot
+import uk.gov.hmrc.capmovie.models.{MovieRegPlot, MovieRegTitle}
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.MoviePlot
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -32,24 +33,32 @@ class MoviePlotController @Inject()(repo: SessionRepo,
                                     login: Login)
   extends FrontendController(mcc) {
 
-  def getMoviePlot: Action[AnyContent] = Action async { implicit request =>
-    login.check { _ =>
-      Future.successful(Ok(plotPage(MovieRegPlot.form.fill(MovieRegPlot("")))))
+  def getMoviePlot(isSessionUpdate: Boolean): Action[AnyContent] = Action async { implicit request =>
+    login.check { id =>
+      repo.readOne(id).map { x =>
+        val form = MovieRegPlot.form.fill(MovieRegPlot(x.get.plot.getOrElse("")))
+        Ok(plotPage(form, isSessionUpdate))
+      }
     }
   }
 
-  def submitMoviePlot: Action[AnyContent] = Action async { implicit request =>
-    login.check { id =>
-      MovieRegPlot.form.bindFromRequest().fold({
-        formWithErrors => Future(BadRequest(plotPage(formWithErrors)))
-      }, { formData =>
-        repo.addPlot(id, formData.plot).map {
-          case true => Redirect(routes.MoviePosterController.getMoviePoster())
-          case false => Unauthorized("error")
-        }.recover {
-          case _ => InternalServerError
+  def submitMoviePlot(isSessionUpdate: Boolean): Action[AnyContent] = Action async { implicit request =>
+    login.check {
+      id =>
+        MovieRegPlot.form.bindFromRequest().fold({
+          formWithErrors => Future(BadRequest(plotPage(formWithErrors, false)))
+        }, { formData =>
+          for {
+            same  <- repo.readOne(id).map { x => x.get.plot.contains(formData.plot) }
+            added <- repo.addPlot(id, formData.plot)
+
+          } yield (same, added) match {
+            case (true, false) => Redirect(routes.MovieSummaryController.getSummary(isSessionUpdate = true))
+            case (false, true) => if (isSessionUpdate) Redirect(routes.MovieSummaryController.getSummary(isSessionUpdate = true)) else Redirect(routes.MoviePosterController.getMoviePoster(false))
+            case _ => InternalServerError
+          }
         }
-      })
+        )
     }
   }
 

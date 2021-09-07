@@ -1,7 +1,7 @@
 @import uk.gov.hmrc.capmovie.models.MovieReg
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @this(layout: Layout, govukInput : GovukInput, govukErrorSummary : GovukErrorSummary)
-@(genresList: List[String] )(implicit request: Request[_], messages: Messages)
+@(genresList: List[String], isSessionUpdate: Boolean )(implicit request: Request[_], messages: Messages)
 @layout(pageTitle = Some("Genres Confirmation Page")) {
 
 
@@ -15,9 +15,15 @@
                 @genre
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a id=genre[@index] class="govuk-link" href="http://localhost:9000/capmovie/movie-genres/confirmation/@genre">
+                @if(isSessionUpdate){
+                <a id=genre[@index] class="govuk-link" href="http://localhost:9000/capmovie/movie-genres/confirmation/@genre/true">
                     Remove<span class="govuk-visually-hidden">@genre</span>
                 </a>
+                } else {
+                <a id=genre[@index] class="govuk-link" href="http://localhost:9000/capmovie/movie-genres/confirmation/@genre/false">
+                Remove<span class="govuk-visually-hidden">@genre</span>
+            </a>
+                }
             </dd>
         </div>
         }
@@ -26,11 +32,19 @@
 
 <br>
 <h2 class="govuk-heading-m">Accept and continue or add another genre</h2>
-<a id="add-another" href="http://localhost:9000/capmovie/movie-genres/" class="govuk-link">Add another genre</a>
+@if(isSessionUpdate){
+<a id="add-another" href="http://localhost:9000/capmovie/movie-genres/true" class="govuk-link">Add another genre</a>
+} else { <a id="add-another" href="http://localhost:9000/capmovie/movie-genres/false" class="govuk-link">Add another genre</a>
+
+}
 <br>
 <br>
-<a id="next-button" class="govuk-button" href="@uk.gov.hmrc.capmovie.controllers.routes.MovieRatingController.getAgeRating()">
+@if(isSessionUpdate){
+<a id="next-button" class="govuk-button" href="@uk.gov.hmrc.capmovie.controllers.routes.MovieSummaryController.getSummary(true)">
     Continue
 </a>
-
+} else { <a id="next-button" class="govuk-button" href="@uk.gov.hmrc.capmovie.controllers.routes.MovieRatingController.getAgeRating(false)">
+    Continue
+</a>
+}
 }
