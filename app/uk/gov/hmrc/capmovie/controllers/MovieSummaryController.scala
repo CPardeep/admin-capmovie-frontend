@@ -36,8 +36,8 @@ class MovieSummaryController @Inject()(repo: SessionRepo,
                                       )
   extends FrontendController(mcc) {
 
-  def getSummary: Action[AnyContent] = Action async { implicit request =>
-    login.check { id => repo.readOne(id).map { movie => Ok(summaryPage(movie.get)) }
+  def getSummary(isSessionUpdate: Boolean): Action[AnyContent] = Action async { implicit request =>
+    login.check { id => repo.readOne(id).map { movie => Ok(summaryPage(movie.get, isSessionUpdate)) }
 
     }
   }

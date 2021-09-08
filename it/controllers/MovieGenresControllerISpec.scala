@@ -16,21 +16,20 @@
 
 package controllers
 
-import org.jsoup.Jsoup
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, SEE_OTHER, UNAUTHORIZED}
-import play.api.test.Helpers.{await, contentAsString, defaultAwaitTimeout, redirectLocation, status}
+import play.api.http.Status._
+import play.api.test.Helpers.{defaultAwaitTimeout, redirectLocation, status}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.capmovie.controllers.MovieGenresController
+import uk.gov.hmrc.capmovie.controllers.predicates.Login
 import uk.gov.hmrc.capmovie.models.MovieReg
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.{MovieGenres, MovieGenresConfirmation}
-import uk.gov.hmrc.capmovie.controllers.predicates.Login
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -46,7 +45,7 @@ class MovieGenresControllerISpec extends AnyWordSpec with Matchers with GuiceOne
 
   "getMovieGenres" should {
     "load the genres page when called" in {
-      val result = controller.getMovieGenres(FakeRequest("GET", "/")
+      val result = controller.getMovieGenres(isSessionUpdate = false)(FakeRequest("GET", "/")
         .withSession("adminId" -> "TESTID"))
       status(result) shouldBe OK
     }
@@ -55,7 +54,7 @@ class MovieGenresControllerISpec extends AnyWordSpec with Matchers with GuiceOne
     "return a form value" when {
       "the form is submitted with valid details" in {
         when(repo.addGenres(any(), any())).thenReturn(Future(true))
-        val result = controller.submitMovieGenres().apply(FakeRequest("POST", "/")
+        val result = controller.submitMovieGenres(isSessionUpdate = false).apply(FakeRequest("POST", "/")
           .withSession("adminId" -> "TESTID")
           .withFormUrlEncodedBody("genres" -> "TestGenre"))
         status(result) shouldBe SEE_OTHER
@@ -63,7 +62,7 @@ class MovieGenresControllerISpec extends AnyWordSpec with Matchers with GuiceOne
     }
     "return a bad request" when {
       "no form value is submitted" in {
-        val result = controller.submitMovieGenres().apply(FakeRequest("POST", "/")
+        val result = controller.submitMovieGenres(isSessionUpdate = false).apply(FakeRequest("POST", "/")
           .withSession("adminId" -> "TESTID")
           .withFormUrlEncodedBody("genres" -> ""))
         status(result) shouldBe BAD_REQUEST
@@ -72,7 +71,7 @@ class MovieGenresControllerISpec extends AnyWordSpec with Matchers with GuiceOne
     "return Unauthorized" when {
       "adminId not valid" in {
         when(repo.addGenres(any(), any())).thenReturn(Future(false))
-        val result = controller.submitMovieGenres().apply(FakeRequest("POST", "/")
+        val result = controller.submitMovieGenres(isSessionUpdate = false).apply(FakeRequest("POST", "/")
           .withSession("adminId" -> "TESTID")
           .withFormUrlEncodedBody("genres" -> "TestGenre"))
         status(result) shouldBe UNAUTHORIZED
@@ -80,7 +79,7 @@ class MovieGenresControllerISpec extends AnyWordSpec with Matchers with GuiceOne
     }
     "return InternalServerError" in {
       when(repo.addGenres(any(), any())).thenReturn(Future.failed(new RuntimeException))
-      val result = controller.submitMovieGenres().apply(FakeRequest("POST", "/")
+      val result = controller.submitMovieGenres(isSessionUpdate = false).apply(FakeRequest("POST", "/")
         .withSession("adminId" -> "TESTID")
         .withFormUrlEncodedBody("genres" -> "TestGenre"))
       status(result) shouldBe INTERNAL_SERVER_ERROR
@@ -91,7 +90,7 @@ class MovieGenresControllerISpec extends AnyWordSpec with Matchers with GuiceOne
     "load genres confirmation page" in {
       when(repo.readOne(any()))
         .thenReturn(Future.successful(Some(MovieReg("testId", genres = List("genre1", "genre2")))))
-      val result = controller.getConfirmationPage(FakeRequest("GET", "/")
+      val result = controller.getConfirmationPage(isSessionUpdate = false)(FakeRequest("GET", "/")
         .withSession("adminId" -> "testId"))
       status(result) shouldBe OK
     }
@@ -104,20 +103,20 @@ class MovieGenresControllerISpec extends AnyWordSpec with Matchers with GuiceOne
           .thenReturn(Future(true))
         when(repo.readOne(any()))
           .thenReturn(Future.successful(Some(MovieReg("testId", genres = List("genre1", "genre2")))))
-        val result = controller.deleteGenre("genre1").apply(FakeRequest("GET", "/")
+        val result = controller.deleteGenre("genre1", isSessionUpdate = false).apply(FakeRequest("GET", "/")
           .withSession("adminId" -> "testId"))
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result).get shouldBe "/capmovie/movie-genres/confirmation"
+        redirectLocation(result).get shouldBe "/capmovie/movie-genres/confirmation/false"
       }
       "genre list is empty" in {
         when(repo.removeGenre(any(), any()))
           .thenReturn(Future(true))
         when(repo.readOne(any()))
           .thenReturn(Future.successful(Some(MovieReg("testId", genres = List()))))
-        val result = controller.deleteGenre("genre1").apply(FakeRequest("GET", "/")
+        val result = controller.deleteGenre("genre1", isSessionUpdate = false).apply(FakeRequest("GET", "/")
           .withSession("adminId" -> "testId"))
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result).get shouldBe "/capmovie/movie-genres"
+        redirectLocation(result).get shouldBe "/capmovie/movie-genres/false"
       }
     }
     "return bad request when admin attempts to delete invalid genre" in {
@@ -125,7 +124,7 @@ class MovieGenresControllerISpec extends AnyWordSpec with Matchers with GuiceOne
         .thenReturn(Future(false))
       when(repo.readOne(any()))
         .thenReturn(Future.successful(None))
-      val result = controller.deleteGenre("").apply(FakeRequest("GET", "/")
+      val result = controller.deleteGenre("", isSessionUpdate = false).apply(FakeRequest("GET", "/")
         .withSession("adminId" -> "testId"))
       status(result) shouldBe INTERNAL_SERVER_ERROR
     }

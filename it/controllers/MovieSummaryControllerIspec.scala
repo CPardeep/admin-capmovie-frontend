@@ -59,7 +59,7 @@ class MovieSummaryControllerIspec extends AnyWordSpec with Matchers with GuiceOn
   "getSummary" should {
     "load the page when called" in {
       when(repo.readOne(any())).thenReturn(Future.successful(Some(movieReg)))
-      val result = controller.getSummary(FakeRequest("GET", "/")
+      val result = controller.getSummary(isSessionUpdate = false)(FakeRequest("GET", "/")
         .withSession("adminId" -> "TESTID"))
       status(result) shouldBe OK
     }

@@ -35,19 +35,19 @@ class MovieGenresController @Inject()(repo: SessionRepo,
                                      )
   extends FrontendController(mcc) {
 
-  def getMovieGenres: Action[AnyContent] = Action async { implicit request =>
+  def getMovieGenres(isSessionUpdate: Boolean): Action[AnyContent] = Action async { implicit request =>
     login.check { _ =>
-      Future.successful(Ok(genresPage(MovieRegGenres.form.fill(MovieRegGenres("")))))
+      Future.successful(Ok(genresPage(MovieRegGenres.form.fill(MovieRegGenres("")), isSessionUpdate)))
     }
   }
 
-  def submitMovieGenres(): Action[AnyContent] = Action async { implicit request =>
+  def submitMovieGenres(isSessionUpdate: Boolean): Action[AnyContent] = Action async { implicit request =>
     login.check { id =>
       MovieRegGenres.form.bindFromRequest().fold({
-        formWithErrors => Future(BadRequest(genresPage(formWithErrors)))
+        formWithErrors => Future(BadRequest(genresPage(formWithErrors, isSessionUpdate)))
       }, { formData =>
         repo.addGenres(id, formData.genres).map {
-          case true => Redirect(routes.MovieGenresController.getConfirmationPage())
+          case true => if (isSessionUpdate) Redirect(routes.MovieGenresController.getConfirmationPage(true)) else Redirect(routes.MovieGenresController.getConfirmationPage(false))
           case false => Unauthorized("error")
         }.recover {
           case _ => InternalServerError
@@ -56,23 +56,29 @@ class MovieGenresController @Inject()(repo: SessionRepo,
     }
   }
 
-  def getConfirmationPage: Action[AnyContent] = Action.async { implicit request =>
+  def getConfirmationPage(isSessionUpdate: Boolean): Action[AnyContent] = Action.async { implicit request =>
     login.check { _ =>
       repo.readOne(request.session.get("adminId").getOrElse("")).map { x =>
-        Ok(genresConfirmationPage(x.get.genres))
+        Ok(genresConfirmationPage(x.get.genres, isSessionUpdate))
       }
     }
   }
 
-  def deleteGenre(genre: String): Action[AnyContent] = Action.async { implicit request =>
+  def deleteGenre(genre: String, isSessionUpdate: Boolean): Action[AnyContent] = Action.async { implicit request =>
     login.check { _ =>
       for {
         deleted <- repo.removeGenre(request.session.get("adminId").getOrElse(""), genre)
         optMovie <- repo.readOne(request.session.get("adminId").getOrElse(""))
       } yield optMovie match {
-        case Some(movie) => if (movie.genres.nonEmpty) Redirect(routes.MovieGenresController.getConfirmationPage())
-        else Redirect(routes.MovieGenresController.getMovieGenres())
-       case _ => InternalServerError
+        case Some(movie) => if (isSessionUpdate) {
+          if (movie.genres.nonEmpty) Redirect(routes.MovieGenresController.getConfirmationPage(isSessionUpdate = true))
+        else Redirect(routes.MovieGenresController.getMovieGenres(isSessionUpdate = true))
+        }
+        else {
+          if (movie.genres.nonEmpty) Redirect(routes.MovieGenresController.getConfirmationPage(isSessionUpdate = false))
+          else Redirect(routes.MovieGenresController.getMovieGenres(isSessionUpdate = false))
+        }
+        case _ => InternalServerError
       }
     }
   }

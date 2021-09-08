@@ -1,7 +1,7 @@
 @import uk.gov.hmrc.capmovie.models.MovieRegPlot
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @this(layout: Layout, govukTextarea : GovukTextarea, govukErrorSummary : GovukErrorSummary)
-@(form: Form[MovieRegPlot])(implicit request: Request[_], messages: Messages)
+@(form: Form[MovieRegPlot], isSessionUpdate: Boolean)(implicit request: Request[_], messages: Messages)
 
 @layout(pageTitle = Some("Add a Plot"), isLoggedIn = true) {
 @if(form.errors.nonEmpty) {
@@ -13,10 +13,11 @@ title = Text(messages("There is a problem"))
 ))
 }
 }
-@helper.form(uk.gov.hmrc.capmovie.controllers.routes.MoviePlotController.submitMoviePlot()) {
+@helper.form(uk.gov.hmrc.capmovie.controllers.routes.MoviePlotController.submitMoviePlot(isSessionUpdate)) {
 <div class="govuk-form-group">
     @govukTextarea(Textarea(
     name = "plot",
+    value = Some(form.data("plot")),
     id = "plot",
     hint = Some(Hint(content = Text("Please provide what the movie plot is"))),
     errorMessage = if(form.errors("title").nonEmpty) {Some(ErrorMessage(

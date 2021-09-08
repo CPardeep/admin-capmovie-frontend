@@ -22,27 +22,42 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar.mock
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK, SEE_OTHER, UNAUTHORIZED}
+import play.api.http.Status._
 import play.api.test.Helpers.{defaultAwaitTimeout, status}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.capmovie.controllers.MoviePosterController
 import uk.gov.hmrc.capmovie.controllers.predicates.Login
+import uk.gov.hmrc.capmovie.models.MovieReg
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.MoviePoster
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class MoviePosterControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
+class MoviePosterControllerISpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite {
 
   val repo: SessionRepo = mock[SessionRepo]
   val posterPage: MoviePoster = app.injector.instanceOf[MoviePoster]
   val login: Login = app.injector.instanceOf[Login]
   val controller = new MoviePosterController(repo, Helpers.stubMessagesControllerComponents(), posterPage, login)
+  val movieReg: MovieReg = MovieReg(
+    adminId = "TESTID",
+    plot = Some("Test plot"),
+    genres = List(
+      "testGenre1",
+      "testGenre2"),
+    rated = Some("testRating"),
+    cast = List(
+      "testPerson",
+      "TestPerson"),
+    poster = Some("testURL"),
+    title = Some("testTitle"))
 
   "getMoviePoster" should {
     "load the page when called" in {
-      val result = controller.getMoviePoster(FakeRequest("GET", "/")
+      when(repo.readOne(any()))
+        .thenReturn(Future(Some(movieReg)))
+      val result = controller.getMoviePoster(isSessionUpdate = false)(FakeRequest("GET", "/")
         .withSession("adminId" -> "TESTID"))
       status(result) shouldBe OK
     }
@@ -50,33 +65,41 @@ class MoviePosterControllerSpec extends AnyWordSpec with Matchers with GuiceOneA
   "submitMoviePoster" should {
     "return a form value" when {
       "the form is submitted" in {
+        when(repo.readOne(any())).thenReturn(Future(Some(movieReg)))
         when(repo.addPoster(any(), any())).thenReturn(Future(true))
-        val result = controller.submitMoviePoster().apply(FakeRequest("POST", "/")
+        val result = controller.submitMoviePoster(isSessionUpdate = false).apply(FakeRequest("POST", "/")
+          .withSession("adminId" -> "TESTID")
+          .withFormUrlEncodedBody("poster" -> "testURL1"))
+        status(result) shouldBe SEE_OTHER
+      }
+    }
+    "returns redirect" when {
+      "when form value is the same" in {
+        when(repo.readOne(any())).thenReturn(Future(Some(movieReg)))
+        when(repo.addPoster(any(), any())).thenReturn(Future(false))
+        val result = controller.submitMoviePoster(isSessionUpdate = true).apply(FakeRequest("POST", "/")
           .withSession("adminId" -> "TESTID")
           .withFormUrlEncodedBody("poster" -> "testURL"))
         status(result) shouldBe SEE_OTHER
       }
     }
+
+
     "return a bad request" when {
       "the form is submitted with errors" in {
-        val result = controller.submitMoviePoster().apply(FakeRequest("POST", "/")
+        val result = controller.submitMoviePoster(isSessionUpdate = false).apply(FakeRequest("POST", "/")
           .withFormUrlEncodedBody("poster" -> "")
           .withSession("adminId" -> "TESTID"))
         status(result) shouldBe BAD_REQUEST
       }
     }
-    "return unauthorized" in {
-      when(repo.addPoster(any(), any())).thenReturn(Future(false))
-      val result = controller.submitMoviePoster().apply(FakeRequest("POST", "/")
-        .withSession("adminId" -> "TESTID")
-        .withFormUrlEncodedBody("poster" -> "testURL"))
-      status(result) shouldBe UNAUTHORIZED
-    }
+
     "returns InternalServerError" in {
-      when(repo.addPoster(any(), any())).thenReturn(Future.failed(new RuntimeException))
-      val result = controller.submitMoviePoster().apply(FakeRequest("POST", "/")
+      when(repo.readOne(any())).thenReturn(Future(Some(movieReg)))
+      when(repo.addPoster(any(), any())).thenReturn(Future(false))
+      val result = controller.submitMoviePoster(isSessionUpdate = false).apply(FakeRequest("POST", "/")
         .withSession("adminId" -> "TESTID")
-        .withFormUrlEncodedBody("poster" -> "testURL"))
+        .withFormUrlEncodedBody("poster" -> "testURL1"))
       status(result) shouldBe INTERNAL_SERVER_ERROR
     }
   }
