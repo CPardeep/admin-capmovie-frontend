@@ -1,12 +1,12 @@
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.capmovie.models.MovieRegRating
 @this(layout: Layout, govukRadios : GovukRadios, govukErrorSummary : GovukErrorSummary)
-@(form: Form[MovieRegRating], isSessionUpdate: Boolean)(implicit request: Request[_], messages: Messages)
-@layout(pageTitle = Some("Age Rating"), isLoggedIn = true){
+@(form: Form[MovieRegRating], isSessionUpdate: Boolean, isUpdate: Boolean, movieId: String)(implicit request: Request[_], messages: Messages)
+@layout(pageTitle = Some("Age Rating")){
 
 <h1 class="govuk-heading-xl" id="Name Value">Please select the age rating of the film:</h1>
-@if(form.errors.nonEmpty){
 
+@if(form.errors.nonEmpty){
 @defining(form.errors.map { error =>
 ErrorLink(href = Some(s"#${error.key}"), content = Text(messages(error.message, error.args:_*)))}) { errorLinks =>
 @govukErrorSummary(ErrorSummary(
@@ -15,7 +15,7 @@ title = Text(messages("Please select the age rating of the film"))))
 }
 }
 
-@helper.form(action = uk.gov.hmrc.capmovie.controllers.routes.MovieRatingController.submitAgeRating(isSessionUpdate)){
+@if(isUpdate == true) { @helper.form(action = uk.gov.hmrc.capmovie.controllers.routes.MovieRatingController.updateAgeRating(movieId)){
 <div class="govuk-form-group">
     @govukRadios(Radios(
     fieldset = Some(Fieldset(
@@ -65,6 +65,58 @@ title = Text(messages("Please select the age rating of the film"))))
         Continue
     </button>
 </div>
+}
+} else { @helper.form(action = uk.gov.hmrc.capmovie.controllers.routes.MovieRatingController.submitAgeRating(isSessionUpdate)){
+<div class="govuk-form-group">
+    @govukRadios(Radios(
+    fieldset = Some(Fieldset(
+    legend = Some(Legend(
+    content = Text("What is the age rating of the film?"),
+    classes = "govuk-fieldset__legend--l",
+    isPageHeading = true
+    ))
+    )),
+    idPrefix = Some("rated"),
+    name = "rated",
+    items = Seq(
+    RadioItem(
+    content = Text("U"),
+    value = Some("U"),
+    checked = form.data("rated") == "U"
+    ),
+    RadioItem(
+    content = Text("PG"),
+    value = Some("PG"),
+    checked = form.data("rated") == "PG"
+    ),
+    RadioItem(
+    content = Text("12A"),
+    value = Some("12A"),
+    checked = form.data("rated") == "12A"
+    ),
+    RadioItem(
+    content = Text("12"),
+    value = Some("12"),
+    checked = form.data("rated") == "12"
+    ),
+    RadioItem(
+    content = Text("15"),
+    value = Some("15"),
+    checked = form.data("rated") == "15"
+    ),
+    RadioItem(
+    content = Text("18"),
+    value = Some("18"),
+    checked = form.data("rated") == "18"
+    )
+    )
+    ))
+    <br>
+    <button id="next-button" class="govuk-button" data-module="govuk-button">
+        Continue
+    </button>
+</div>
+}
 }
 }
 

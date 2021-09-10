@@ -1,10 +1,39 @@
 @import uk.gov.hmrc.capmovie.models.MovieReg
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @this(layout: Layout, govukInput : GovukInput, govukErrorSummary : GovukErrorSummary)
-@(genresList: List[String], isSessionUpdate: Boolean )(implicit request: Request[_], messages: Messages)
+@(genresList: List[String], isSessionUpdate: Boolean, isUpdate: Boolean, movieId: String )(implicit request: Request[_], messages: Messages)
 @layout(pageTitle = Some("Genres Confirmation Page")) {
 
+@if(isUpdate == true) {
+<div>
+    <h1 class="govuk-heading-l">Check your list of genres before continuing</h1>
 
+    <dl id="genres-list" class="govuk-summary-list govuk-!-margin-bottom-9">
+        @for((genre,index) <- genresList.zipWithIndex) {
+        <div class="govuk-summary-list__row">
+            <dd class="govuk-summary-list__value genre">
+                @genre
+            </dd>
+            <dd class="govuk-summary-list__actions">
+                <a id=genre[@index] class="govuk-link" href="http://localhost:9000/capmovie/update/@movieId/genre/@genre">
+                    Remove<span class="govuk-visually-hidden">@genre</span>
+                </a>
+            </dd>
+        </div>
+        }
+    </dl>
+</div>
+
+<br>
+<h2 class="govuk-heading-m">Accept and continue or add another genre</h2>
+<a id="add-another" href="http://localhost:9000/capmovie/update/@movieId/genre " class="govuk-link">Add another genre</a>
+<br>
+<br>
+<a id="next-button" class="govuk-button" href="@uk.gov.hmrc.capmovie.controllers.routes.MovieRatingController.getUpdateAgeRating(movieId)">
+    Continue
+</a>
+
+} else {
 <div>
     <h1 class="govuk-heading-l">Check your list of genres before continuing</h1>
 
@@ -46,5 +75,6 @@
 } else { <a id="next-button" class="govuk-button" href="@uk.gov.hmrc.capmovie.controllers.routes.MovieRatingController.getAgeRating(false)">
     Continue
 </a>
+}
 }
 }

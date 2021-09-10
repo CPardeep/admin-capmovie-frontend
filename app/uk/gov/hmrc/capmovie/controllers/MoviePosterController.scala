@@ -17,8 +17,9 @@
 package uk.gov.hmrc.capmovie.controllers
 
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.capmovie.connectors.UpdateConnector
 import uk.gov.hmrc.capmovie.controllers.predicates.Login
-import uk.gov.hmrc.capmovie.models.{MovieRegPoster, MovieRegTitle}
+import uk.gov.hmrc.capmovie.models.MovieRegPoster
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.MoviePoster
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -30,14 +31,16 @@ import scala.concurrent.Future
 class MoviePosterController @Inject()(repo: SessionRepo,
                                       mcc: MessagesControllerComponents,
                                       posterPage: MoviePoster,
-                                      login: Login
+                                      login: Login,
+                                      connector: UpdateConnector
                                      )
   extends FrontendController(mcc) {
+
   def getMoviePoster(isSessionUpdate: Boolean): Action[AnyContent] = Action async { implicit request =>
     login.check { id =>
       repo.readOne(id).map { x =>
         val form = MovieRegPoster.form.fill(MovieRegPoster(x.get.poster.getOrElse("")))
-        Ok(posterPage(form, isSessionUpdate))
+        Ok(posterPage(form, isSessionUpdate, isUpdate = false, ""))
       }
     }
   }
@@ -47,10 +50,10 @@ class MoviePosterController @Inject()(repo: SessionRepo,
     login.check {
       id =>
         MovieRegPoster.form.bindFromRequest().fold({
-          formWithErrors => Future(BadRequest(posterPage(formWithErrors, false)))
+          formWithErrors => Future(BadRequest(posterPage(formWithErrors, isSessionUpdate = false, isUpdate = false, "")))
         }, { formData =>
           for {
-            same  <- repo.readOne(id).map { x => x.get.poster.contains(formData.poster) }
+            same <- repo.readOne(id).map { x => x.get.poster.contains(formData.poster) }
             added <- repo.addPoster(id, formData.poster)
 
           } yield (same, added) match {
@@ -62,4 +65,32 @@ class MoviePosterController @Inject()(repo: SessionRepo,
         )
     }
   }
+
+
+  def getUpdatePoster(id: String): Action[AnyContent] = Action async { implicit request =>
+    login.check { _ =>
+      connector.readOne(id).flatMap { x =>
+        val form = MovieRegPoster.form.fill(MovieRegPoster(x.get.poster))
+        Future.successful(Ok(posterPage(form, isSessionUpdate = false, isUpdate = true, id)))
+      }
+    }
+  }
+
+  def updateMoviePoster(id: String): Action[AnyContent] = Action.async { implicit request =>
+    login.check { _ =>
+      MovieRegPoster.form.bindFromRequest().fold({
+        formWithErrors =>
+          Future(BadRequest(posterPage(formWithErrors, isSessionUpdate = false, isUpdate = true, id)))
+      }, { formData =>
+        for {
+          same <- connector.readOne(id).map { x => x.get.poster.contains(formData.poster) }
+          updated <- connector.updatePoster(id, formData.poster)
+        } yield (same, updated) match {
+          case (true, false) | (false, true) => Redirect(routes.MovieCastController.getUpdateConfirmationPage(id))
+          case _ => InternalServerError
+        }
+      })
+    }
+  }
+
 }

@@ -16,7 +16,6 @@
 
 package controllers
 
-import akka.http.scaladsl.model.HttpHeader.ParsingResult.Ok
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import org.scalatest.matchers.should.Matchers

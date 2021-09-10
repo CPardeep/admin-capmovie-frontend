@@ -1,8 +1,9 @@
 @import uk.gov.hmrc.capmovie.models.MovieRegGenres
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @this(layout: Layout, govukInput : GovukInput, govukErrorSummary : GovukErrorSummary)
-@(form: Form[MovieRegGenres], isSessionUpdate: Boolean)(implicit request: Request[_], messages: Messages)
+@(form: Form[MovieRegGenres], isSessionUpdate: Boolean, isUpdate: Boolean, movieId: String)(implicit request: Request[_], messages: Messages)
 @layout(pageTitle = Some("Genres Page")) {
+
 @if(form.errors.nonEmpty) {
 @defining(form.errors.map { error =>
 ErrorLink(href = Some(s"#${error.key}"), content = Text(messages(error.message, error.args:_*)))
@@ -12,7 +13,8 @@ title = Text(messages("There is a problem"))
 ))
 }
 }
-@helper.form(uk.gov.hmrc.capmovie.controllers.routes.MovieGenresController.submitMovieGenres(isSessionUpdate)) {
+
+@if(isUpdate == true) { @helper.form(uk.gov.hmrc.capmovie.controllers.routes.MovieGenresController.updateMovieGenre(movieId)) {
 <div class="govuk-form-group">
 
     @govukInput(Input(
@@ -33,5 +35,28 @@ title = Text(messages("There is a problem"))
         Continue
     </button>
 </div>
+}
+} else {@helper.form(uk.gov.hmrc.capmovie.controllers.routes.MovieGenresController.submitMovieGenres(isSessionUpdate)) {
+<div class="govuk-form-group">
+
+    @govukInput(Input(
+    id = "genres",
+    name = "genres",
+    hint = Some(Hint(content = Text(""))),
+    errorMessage = if(form.errors("genres").nonEmpty) {Some(ErrorMessage(
+    content = Text("Enter a genre")))} else {None},
+    label = Label(
+    isPageHeading = true,
+    classes = "govuk-label--l",
+    content = Text("What is the genre of the movie?")
+    )
+    ))
+
+    <br>
+    <button id="next-button" class="govuk-button" data-module="govuk-button">
+        Continue
+    </button>
+</div>
+}
 }
 }

@@ -104,5 +104,4 @@ class SessionRepo @Inject()(mongoComponent: MongoComponent) extends PlayMongoRep
     ).toFuture().map(result => result.getModifiedCount == 1 && result.wasAcknowledged())
   }
 
-
 }

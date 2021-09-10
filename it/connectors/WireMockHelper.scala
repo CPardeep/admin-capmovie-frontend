@@ -21,6 +21,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.ws.WSClient
@@ -47,7 +48,7 @@ trait WireMockHelper extends Eventually with IntegrationPatience {
 
   def resetWireMock(): Unit = WireMock.reset()
 
-  def stubPost(url: String, status: Integer, responseBody: String) =
+  def stubPost(url: String, status: Integer, responseBody: String): StubMapping =
     stubFor(post(urlMatching(url))
       .willReturn(
         aResponse().
@@ -56,7 +57,7 @@ trait WireMockHelper extends Eventually with IntegrationPatience {
       )
     )
 
-  def stubGet(url: String, status: Integer, body: String) =
+  def stubGet(url: String, status: Integer, body: String): StubMapping =
     stubFor(get(urlMatching(url))
       .willReturn(
         aResponse().
@@ -65,7 +66,7 @@ trait WireMockHelper extends Eventually with IntegrationPatience {
       )
     )
 
-  def stubPut(url: String, status: Integer, responseBody: String) =
+  def stubPut(url: String, status: Integer, responseBody: String): StubMapping =
     stubFor(put(urlMatching(url))
       .willReturn(
         aResponse().
@@ -74,12 +75,21 @@ trait WireMockHelper extends Eventually with IntegrationPatience {
       )
     )
 
-  def stubDelete(url: String, status: Integer, responseBody: String) =
+  def stubDelete(url: String, status: Integer, responseBody: String): StubMapping =
     stubFor(delete(urlMatching(url))
       .willReturn(
         aResponse().
           withStatus(status).
           withBody(responseBody)
+      )
+    )
+
+  def stubPatch(url: String, status: Integer, responseBody: String): StubMapping =
+    stubFor(patch(urlMatching(url))
+      .willReturn(
+        aResponse()
+          .withStatus(status)
+          .withBody(responseBody)
       )
     )
 }
