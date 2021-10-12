@@ -28,7 +28,7 @@ import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.capmovie.connectors.UpdateConnector
 import uk.gov.hmrc.capmovie.controllers.MoviePlotController
 import uk.gov.hmrc.capmovie.controllers.predicates.Login
-import uk.gov.hmrc.capmovie.models.{Movie, MovieReg}
+import uk.gov.hmrc.capmovie.models.{Movie, MovieReg, MovieWithAvgRating}
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.MoviePlot
 
@@ -69,6 +69,10 @@ class MoviePlotControllerISpec extends AnyWordSpec with Matchers with GuiceOneAp
     poster = "testURL",
     title = "testTitle")
 
+  val movieWithAvgRating: MovieWithAvgRating = MovieWithAvgRating(
+    movie = movie,
+    avgRating = 0.0
+  )
 
   "getMoviePlot" should {
     "load the page when called" in {
@@ -125,7 +129,7 @@ class MoviePlotControllerISpec extends AnyWordSpec with Matchers with GuiceOneAp
   "getUpdatePlot" should {
     "load the page when called" in {
       when(connector.readOne(any()))
-        .thenReturn(Future(Some(movie)))
+        .thenReturn(Future(Some(movieWithAvgRating)))
       val result = controller.getUpdatePlot("TESTMOV").apply(FakeRequest("GET", "/")
         .withSession("adminId" -> "TESTID"))
       status(result) shouldBe OK
@@ -141,7 +145,7 @@ class MoviePlotControllerISpec extends AnyWordSpec with Matchers with GuiceOneAp
     }
     "the form is submitted" in {
       when(connector.readOne(any()))
-        .thenReturn(Future(Some(movie)))
+        .thenReturn(Future(Some(movieWithAvgRating)))
       when(connector.updatePlot(any(), any())).thenReturn(Future(true))
       val result = controller.updateMoviePlot("TESTMOV").apply(FakeRequest("POST", "/")
         .withSession("adminId" -> "TESTID")
@@ -151,7 +155,7 @@ class MoviePlotControllerISpec extends AnyWordSpec with Matchers with GuiceOneAp
     "returns redirect" when{
       "when form value is the same" in {
         when(connector.readOne(any()))
-          .thenReturn(Future(Some(movie)))
+          .thenReturn(Future(Some(movieWithAvgRating)))
         when(connector.updatePlot(any(), any())).thenReturn(Future(false))
         val result = controller.updateMoviePlot("TESTMOV").apply(FakeRequest("POST", "/")
           .withSession("adminId" -> "TESTID")
@@ -161,7 +165,7 @@ class MoviePlotControllerISpec extends AnyWordSpec with Matchers with GuiceOneAp
     }
     "returns internalServerError" in {
       when(connector.readOne(any()))
-        .thenReturn(Future(Some(movie)))
+        .thenReturn(Future(Some(movieWithAvgRating)))
       when(connector.updatePlot(any(), any())).thenReturn(Future(false))
       val result = controller.updateMoviePlot("TESTMOV").apply(FakeRequest("POST", "/")
         .withSession("adminId" -> "TESTID")

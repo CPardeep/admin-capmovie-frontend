@@ -28,7 +28,7 @@ import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.capmovie.connectors.UpdateConnector
 import uk.gov.hmrc.capmovie.controllers.MovieGenresController
 import uk.gov.hmrc.capmovie.controllers.predicates.Login
-import uk.gov.hmrc.capmovie.models.{Movie, MovieReg}
+import uk.gov.hmrc.capmovie.models.{Movie, MovieReg, MovieWithAvgRating}
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.{MovieGenres, MovieGenresConfirmation}
 
@@ -70,6 +70,11 @@ class MovieGenresControllerISpec extends AnyWordSpec with Matchers with GuiceOne
       "TestPerson"),
     poster = "testURL",
     title = "testTitle")
+
+  val movieWithAvgRating: MovieWithAvgRating = MovieWithAvgRating(
+    movie = movie,
+    avgRating = 0.0
+  )
 
   "getMovieGenres" should {
     "load the genres page when called" in {
@@ -181,7 +186,7 @@ class MovieGenresControllerISpec extends AnyWordSpec with Matchers with GuiceOne
 
     "the form is submitted" in {
       when(connector.readOne(any()))
-        .thenReturn(Future(Some(movie)))
+        .thenReturn(Future(Some(movieWithAvgRating)))
       when(connector.updateGenre(any(), any())).thenReturn(Future(true))
       val result = controller.updateMovieGenre("TESTMOV").apply(FakeRequest("POST", "/")
         .withSession("adminId" -> "TESTID")
@@ -192,7 +197,7 @@ class MovieGenresControllerISpec extends AnyWordSpec with Matchers with GuiceOne
     "returns redirect" when {
       "the same form value is submitted" in {
         when(connector.readOne(any()))
-          .thenReturn(Future(Some(movie)))
+          .thenReturn(Future(Some(movieWithAvgRating)))
         when(connector.updateGenre(any(), any())).thenReturn(Future(false))
         val result = controller.updateMovieGenre("TESTMOV").apply(FakeRequest("POST", "/")
           .withSession("adminId" -> "TESTID")
@@ -203,7 +208,7 @@ class MovieGenresControllerISpec extends AnyWordSpec with Matchers with GuiceOne
 
     "returns internalServerError" in {
       when(connector.readOne(any()))
-        .thenReturn(Future(Some(movie)))
+        .thenReturn(Future(Some(movieWithAvgRating)))
       when(connector.updateGenre(any(), any())).thenReturn(Future(false))
       val result = controller.updateMovieGenre("TESTMOV").apply(FakeRequest("POST", "/")
         .withSession("adminId" -> "TESTID")
@@ -214,7 +219,7 @@ class MovieGenresControllerISpec extends AnyWordSpec with Matchers with GuiceOne
 
   "getUpdateConfirmationPage" should {
     "load genres confirmation page" in {
-      when(connector.readOne(any())).thenReturn(Future.successful(Some(movie)))
+      when(connector.readOne(any())).thenReturn(Future.successful(Some(movieWithAvgRating)))
       val result = controller.getUpdateConfirmationPage("TESTMOV")
         .apply(FakeRequest("GET", "/")
           .withSession("adminId" -> "testId"))
@@ -228,7 +233,7 @@ class MovieGenresControllerISpec extends AnyWordSpec with Matchers with GuiceOne
         when(connector.removeGenre(any(), any()))
           .thenReturn(Future(true))
         when(connector.readOne(any()))
-          .thenReturn(Future.successful(Some(movie)))
+          .thenReturn(Future.successful(Some(movieWithAvgRating)))
         val result = controller.updateDeleteGenre("TESTMOV", "genre1")
           .apply(FakeRequest("GET", "/")
             .withSession("adminId" -> "testId"))
@@ -241,7 +246,7 @@ class MovieGenresControllerISpec extends AnyWordSpec with Matchers with GuiceOne
         when(connector.removeGenre(any(), any()))
           .thenReturn(Future(true))
         when(connector.readOne(any()))
-          .thenReturn(Future.successful(Some(movie.copy(genres = List()))))
+          .thenReturn(Future.successful(Some(MovieWithAvgRating(movie.copy(genres = List()), 0.0))))
         val result = controller.updateDeleteGenre("TESTMOV", "genre1")
           .apply(FakeRequest("GET", "/")
             .withSession("adminId" -> "testId"))

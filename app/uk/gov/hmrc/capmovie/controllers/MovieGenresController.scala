@@ -100,7 +100,7 @@ class MovieGenresController @Inject()(repo: SessionRepo,
         formWithErrors => Future(BadRequest(genresPage(formWithErrors, isSessionUpdate = false, isUpdate = true, id)))
       }, { formData =>
         for {
-          same <- connector.readOne(id).map { x => x.get.genres.contains(formData.genres) }
+          same <- connector.readOne(id).map { x => x.get.movie.genres.contains(formData.genres) }
           updated <- connector.updateGenre(id, formData.genres)
         } yield (same, updated) match {
           case (true, false) | (false, true) => Redirect(routes.MovieGenresController.getUpdateConfirmationPage(id))
@@ -113,7 +113,7 @@ class MovieGenresController @Inject()(repo: SessionRepo,
   def getUpdateConfirmationPage(id: String): Action[AnyContent] = Action.async { implicit request =>
     login.check { _ =>
       connector.readOne(id).map { x =>
-        Ok(genresConfirmationPage(x.get.genres, isSessionUpdate = false, isUpdate = true, id))
+        Ok(genresConfirmationPage(x.get.movie.genres, isSessionUpdate = false, isUpdate = true, id))
       }
     }
   }
@@ -124,7 +124,7 @@ class MovieGenresController @Inject()(repo: SessionRepo,
         deleted <- connector.removeGenre(id, genre)
         optMovie <- connector.readOne(id)
       } yield optMovie match {
-        case Some(movie) => if (movie.genres.nonEmpty) Redirect(routes.MovieGenresController.getUpdateConfirmationPage(id))
+        case Some(movie) => if (movie.movie.genres.nonEmpty) Redirect(routes.MovieGenresController.getUpdateConfirmationPage(id))
         else Redirect(routes.MovieGenresController.getUpdateGenre(id))
         case _ => InternalServerError
       }

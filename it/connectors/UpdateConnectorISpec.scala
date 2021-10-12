@@ -23,7 +23,7 @@ import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.json.Json
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.capmovie.connectors.UpdateConnector
-import uk.gov.hmrc.capmovie.models.Movie
+import uk.gov.hmrc.capmovie.models.{Movie, MovieWithAvgRating}
 
 class UpdateConnectorISpec extends AnyWordSpec with Matchers with GuiceOneServerPerSuite
   with WireMockHelper with BeforeAndAfterEach {
@@ -51,11 +51,16 @@ class UpdateConnectorISpec extends AnyWordSpec with Matchers with GuiceOneServer
     poster = "testURL",
     title = "testTitle")
 
+  val movieWithAvgRating: MovieWithAvgRating = MovieWithAvgRating(
+    movie = movie,
+    avgRating = 0.0
+  )
+
   "readOne" should {
     "return a movie" in {
-      stubGet(s"/movie/${movie.id}", 200, Json.toJson(movie).toString())
+      stubGet(s"/movie/${movie.id}", 200, Json.toJson(movieWithAvgRating).toString())
       val result = connector.readOne(movie.id)
-      await(result) shouldBe Some(movie)
+      await(result) shouldBe Some(movieWithAvgRating)
     }
     "return None" in {
       stubGet(s"/movie/${movie.id}", 200, Json.toJson("{}").toString())

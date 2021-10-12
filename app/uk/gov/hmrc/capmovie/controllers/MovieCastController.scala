@@ -94,7 +94,7 @@ class MovieCastController @Inject()(repo: SessionRepo,
         formWithErrors => Future(BadRequest(castPage(formWithErrors, isUpdate = true, id)))
       }, { formData =>
         for {
-          same <- connector.readOne(id).map { x => x.get.cast.contains(formData.cast) }
+          same <- connector.readOne(id).map { x => x.get.movie.cast.contains(formData.cast) }
           updated <- connector.updateCast(id, formData.cast)
         } yield (same, updated) match {
           case (true, false) | (false, true) => Redirect(routes.MovieCastController.getUpdateConfirmationPage(id))
@@ -107,7 +107,7 @@ class MovieCastController @Inject()(repo: SessionRepo,
   def getUpdateConfirmationPage(id: String): Action[AnyContent] = Action async { implicit request =>
     login.check { _ =>
       connector.readOne(id).map { x =>
-        Ok(confirmPage(x.get.cast, isUpdate = true, id))
+        Ok(confirmPage(x.get.movie.cast, isUpdate = true, id))
       }
     }
   }
@@ -118,7 +118,7 @@ class MovieCastController @Inject()(repo: SessionRepo,
         deleted <- connector.removeCast(id, cast)
         optMovie <- connector.readOne(id)
       } yield optMovie match {
-        case Some(movie) => if (movie.cast.nonEmpty) Redirect(routes.MovieCastController.getUpdateConfirmationPage(id))
+        case Some(movie) => if (movie.movie.cast.nonEmpty) Redirect(routes.MovieCastController.getUpdateConfirmationPage(id))
         else Redirect(routes.MovieCastController.getUpdateCast(id))
         case _ => InternalServerError
       }

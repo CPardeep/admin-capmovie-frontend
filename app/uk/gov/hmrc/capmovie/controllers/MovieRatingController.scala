@@ -69,7 +69,7 @@ class MovieRatingController @Inject()(repo: SessionRepo,
   def getUpdateAgeRating(id: String): Action[AnyContent] = Action async { implicit request =>
     login.check { _ =>
       connector.readOne(id).flatMap { x =>
-        val form = MovieRegRating.form.fill(MovieRegRating(x.get.rated))
+        val form = MovieRegRating.form.fill(MovieRegRating(x.get.movie.rated))
         Future.successful(Ok(ageRatingPage(form, isSessionUpdate = false, isUpdate = true, id)))
       }
     }
@@ -81,7 +81,7 @@ class MovieRatingController @Inject()(repo: SessionRepo,
         formWithErrors => Future(BadRequest(ageRatingPage(formWithErrors, isSessionUpdate = false, isUpdate = true, id)))
       }, { formData =>
         for {
-          same <- connector.readOne(id).map { x => x.get.rated.contains(formData.rating) }
+          same <- connector.readOne(id).map { x => x.get.movie.rated.contains(formData.rating) }
           updated <- connector.updateRating(id, formData.rating)
         } yield (same, updated) match {
           case (true, false) | (false, true) => Redirect(routes.MoviePlotController.updateMoviePlot(id))
