@@ -70,7 +70,7 @@ class MoviePosterController @Inject()(repo: SessionRepo,
   def getUpdatePoster(id: String): Action[AnyContent] = Action async { implicit request =>
     login.check { _ =>
       connector.readOne(id).flatMap { x =>
-        val form = MovieRegPoster.form.fill(MovieRegPoster(x.get.poster))
+        val form = MovieRegPoster.form.fill(MovieRegPoster(x.get.movie.poster))
         Future.successful(Ok(posterPage(form, isSessionUpdate = false, isUpdate = true, id)))
       }
     }
@@ -83,7 +83,7 @@ class MoviePosterController @Inject()(repo: SessionRepo,
           Future(BadRequest(posterPage(formWithErrors, isSessionUpdate = false, isUpdate = true, id)))
       }, { formData =>
         for {
-          same <- connector.readOne(id).map { x => x.get.poster.contains(formData.poster) }
+          same <- connector.readOne(id).map { x => x.get.movie.poster.contains(formData.poster) }
           updated <- connector.updatePoster(id, formData.poster)
         } yield (same, updated) match {
           case (true, false) | (false, true) => Redirect(routes.MovieCastController.getUpdateConfirmationPage(id))

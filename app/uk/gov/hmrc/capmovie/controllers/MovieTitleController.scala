@@ -69,7 +69,7 @@ class MovieTitleController @Inject()(repo: SessionRepo,
   def getUpdateTitle(id: String): Action[AnyContent] = Action async { implicit request =>
     login.check { _ =>
       connector.readOne(id).flatMap { x =>
-        val form = MovieRegTitle.form.fill(MovieRegTitle(x.get.title))
+        val form = MovieRegTitle.form.fill(MovieRegTitle(x.get.movie.title))
         Future.successful(Ok(titlePage(form, isSessionUpdate = false, isUpdate = true, id)))
       }
     }
@@ -84,7 +84,7 @@ class MovieTitleController @Inject()(repo: SessionRepo,
           }, {
             formData =>
               for {
-                same <- connector.readOne(id).map { x => x.get.title.contains(formData.title) }
+                same <- connector.readOne(id).map { x => x.get.movie.title.contains(formData.title) }
                 updated <- connector.updateTitle(id, formData.title)
               } yield (same, updated) match {
                 case (true, false) | (false, true) => Redirect(routes.MovieGenresController.getUpdateConfirmationPage(id))

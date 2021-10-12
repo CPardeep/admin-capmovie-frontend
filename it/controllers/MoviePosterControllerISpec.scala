@@ -28,7 +28,7 @@ import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.capmovie.connectors.UpdateConnector
 import uk.gov.hmrc.capmovie.controllers.MoviePosterController
 import uk.gov.hmrc.capmovie.controllers.predicates.Login
-import uk.gov.hmrc.capmovie.models.{Movie, MovieReg}
+import uk.gov.hmrc.capmovie.models.{Movie, MovieReg, MovieWithAvgRating}
 import uk.gov.hmrc.capmovie.repo.SessionRepo
 import uk.gov.hmrc.capmovie.views.html.MoviePoster
 
@@ -68,6 +68,11 @@ class MoviePosterControllerISpec extends AnyWordSpec with Matchers with GuiceOne
       "TestPerson"),
     poster = "testURL",
     title = "testTitle")
+
+  val movieWithAvgRating: MovieWithAvgRating = MovieWithAvgRating(
+    movie = movie,
+    avgRating = 0.0
+  )
 
   "getMoviePoster" should {
     "load the page when called" in {
@@ -123,7 +128,7 @@ class MoviePosterControllerISpec extends AnyWordSpec with Matchers with GuiceOne
   "getUpdatePoster" should {
     "load the page when called" in {
       when(connector.readOne(any()))
-        .thenReturn(Future(Some(movie)))
+        .thenReturn(Future(Some(movieWithAvgRating)))
       val result = controller.getUpdatePoster("TESTMOV").apply(FakeRequest("GET", "/")
         .withSession("adminId" -> "TESTID"))
       status(result) shouldBe OK
@@ -133,7 +138,7 @@ class MoviePosterControllerISpec extends AnyWordSpec with Matchers with GuiceOne
   "updateMoviePoster" should {
     "the form is submitted with errors" in {
       when(connector.readOne(any()))
-        .thenReturn(Future(Some(movie)))
+        .thenReturn(Future(Some(movieWithAvgRating)))
       val result = controller.updateMoviePoster("TESTMOV").apply(FakeRequest("POST", "/")
         .withSession("adminId" -> "TESTID")
         .withFormUrlEncodedBody("poster" -> ""))
@@ -142,7 +147,7 @@ class MoviePosterControllerISpec extends AnyWordSpec with Matchers with GuiceOne
 
     "the form is submitted" in {
       when(connector.readOne(any()))
-        .thenReturn(Future(Some(movie)))
+        .thenReturn(Future(Some(movieWithAvgRating)))
       when(connector.updatePoster(any(), any())).thenReturn(Future(true))
       val result = controller.updateMoviePoster("TESTMOV").apply(FakeRequest("POST", "/")
         .withSession("adminId" -> "TESTID")
@@ -153,7 +158,7 @@ class MoviePosterControllerISpec extends AnyWordSpec with Matchers with GuiceOne
     "returns redirect" when{
       "when form value is the same" in {
         when(connector.readOne(any()))
-          .thenReturn(Future(Some(movie)))
+          .thenReturn(Future(Some(movieWithAvgRating)))
         when(connector.updatePoster(any(), any())).thenReturn(Future(false))
         val result = controller.updateMoviePoster("TESTMOV").apply(FakeRequest("POST", "/")
           .withSession("adminId" -> "TESTID")
@@ -164,7 +169,7 @@ class MoviePosterControllerISpec extends AnyWordSpec with Matchers with GuiceOne
 
     "returns internalServerError" in {
       when(connector.readOne(any()))
-        .thenReturn(Future(Some(movie)))
+        .thenReturn(Future(Some(movieWithAvgRating)))
       when(connector.updatePoster(any(), any())).thenReturn(Future(false))
       val result = controller.updateMoviePoster("TESTMOV").apply(FakeRequest("POST", "/")
         .withSession("adminId" -> "TESTID")

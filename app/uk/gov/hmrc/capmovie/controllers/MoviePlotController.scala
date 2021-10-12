@@ -67,7 +67,7 @@ class MoviePlotController @Inject()(repo: SessionRepo,
   def getUpdatePlot(id: String): Action[AnyContent] = Action async { implicit request =>
     login.check { _ =>
       connector.readOne(id).flatMap { x =>
-        val form = MovieRegPlot.form.fill(MovieRegPlot(x.get.plot))
+        val form = MovieRegPlot.form.fill(MovieRegPlot(x.get.movie.plot))
         Future.successful(Ok(plotPage(form, isSessionUpdate = false, isUpdate = true, id)))
       }
     }
@@ -79,7 +79,7 @@ class MoviePlotController @Inject()(repo: SessionRepo,
         formWithErrors => Future(BadRequest(plotPage(formWithErrors, isSessionUpdate = false, isUpdate = true, id)))
       }, { formData =>
         for {
-          same <- connector.readOne(id).map { x => x.get.plot.contains(formData.plot) }
+          same <- connector.readOne(id).map { x => x.get.movie.plot.contains(formData.plot) }
           updated <- connector.updatePlot(id, formData.plot)
         } yield (same, updated) match {
           case (true, false) | (false, true) => Redirect(routes.MoviePosterController.getUpdatePoster(id))

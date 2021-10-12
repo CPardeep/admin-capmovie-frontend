@@ -19,7 +19,7 @@ package uk.gov.hmrc.capmovie.connectors
 import play.api.libs.json.{JsError, JsSuccess, Json}
 import play.api.libs.ws.WSClient
 import play.api.mvc.{AbstractController, ControllerComponents}
-import uk.gov.hmrc.capmovie.models.Movie
+import uk.gov.hmrc.capmovie.models.MovieWithAvgRating
 
 import javax.inject.Inject
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -29,10 +29,10 @@ class UpdateConnector @Inject()(ws: WSClient,
                                 cc: ControllerComponents)
   extends AbstractController(cc) {
 
-  def readOne(id: String): Future[Option[Movie]] = {
+  def readOne(id: String): Future[Option[MovieWithAvgRating]] = {
     ws.url("http://localhost:9009/movie/" + id).get().map { response =>
       response.status match {
-        case 200 => response.json.validate[Movie] match {
+        case 200 => response.json.validate[MovieWithAvgRating] match {
           case JsSuccess(movie, _) => Some(movie)
           case JsError(_) => None
         }
